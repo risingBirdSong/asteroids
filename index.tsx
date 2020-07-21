@@ -30,7 +30,7 @@ const App = new p5((s: p5) => {
   };
   const redSwirl = () => {
     // s.translate(s.width / 2, s.height / 2);
-    s.rotate(ship.angle);
+    // s.rotate(ship.angle);
     ship.angle++;
     s.fill(250, 50, 100);
     s.rect(ship.x + 5, ship.y + 5, 100, 5);

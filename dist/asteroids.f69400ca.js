@@ -101503,7 +101503,7 @@ var App = new p5_1.default(function (s) {
 
   var redSwirl = function redSwirl() {
     // s.translate(s.width / 2, s.height / 2);
-    s.rotate(ship.angle);
+    // s.rotate(ship.angle);
     ship.angle++;
     s.fill(250, 50, 100);
     s.rect(ship.x + 5, ship.y + 5, 100, 5);
