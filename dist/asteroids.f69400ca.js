@@ -101491,7 +101491,7 @@ var App = new p5_1.default(function (s) {
       y: s.height / 2,
       angle: 0,
       speed: 3,
-      angleChange: 4
+      angleChange: 5
     };
   }; // s.keyPressed = () => {
   //   switch (s.keyCode) {
@@ -101511,12 +101511,15 @@ var App = new p5_1.default(function (s) {
   var shipLogic = function shipLogic() {
     s.translate(ship.x, ship.y);
     s.rotate(s.radians(ship.angle));
-    s.fill(150);
-    s.strokeWeight(2);
-    s.stroke(50);
-    s.rect(0, 0, 100, 30);
-    s.fill(200);
-    s.rect(0, 0, 10, 30);
+    s.stroke(50); // s.rect(0, 0, 100, 30);
+    // s.fill(200);
+    // s.rect(0, 0, 10, 30);
+
+    s.strokeWeight(10);
+    s.strokeCap("round");
+    s.line(0, 0, 40, 0);
+    s.stroke(200, 1, 100);
+    s.ellipse(0, 0, 4, 4);
   };
 
   var logger = function logger() {
@@ -101544,6 +101547,19 @@ var App = new p5_1.default(function (s) {
     }
   };
 
+  var increaseAngleSpeed = function increaseAngleSpeed() {
+    if (s.keyIsDown(69)) {
+      console.log("angle ++");
+      ship.angleChange += 0.3;
+    }
+  };
+
+  var decreaseAngleSpeed = function decreaseAngleSpeed() {
+    if (s.keyIsDown(81)) {
+      ship.angleChange -= 0.3;
+    }
+  };
+
   var decreaseSpeed = function decreaseSpeed() {
     if (s.keyIsDown(83)) {
       ship.speed -= 0.1;
@@ -101565,13 +101581,13 @@ var App = new p5_1.default(function (s) {
 
   var handleLeft = function handleLeft() {
     if (s.keyIsPressed && s.keyCode === s.LEFT_ARROW) {
-      ship.angle -= ship.angleChange;
+      ship.angle -= ship.angleChange * 2;
     }
   };
 
   var handleRight = function handleRight() {
     if (s.keyIsPressed && s.keyCode === s.RIGHT_ARROW) {
-      ship.angle += ship.angleChange;
+      ship.angle += ship.angleChange * 2;
     }
   };
 
@@ -101605,6 +101621,8 @@ var App = new p5_1.default(function (s) {
     handleDirections();
     increaseSpeed();
     decreaseSpeed();
+    increaseAngleSpeed();
+    decreaseAngleSpeed();
     s.background(100);
     shipLogic();
   };
