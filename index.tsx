@@ -8,39 +8,28 @@ interface shipI {
 
 console.log("force");
 const App = new p5((s: p5) => {
-  let ship: shipI = {
-    x: 10,
-    y: 10,
-    angle: 1,
-  };
+  let ship: shipI;
   s.setup = () => {
     s.createCanvas(800, 800);
-    // s.background(100);
+    s.background(100);
+    s.frameRate(20);
+    ship = {
+      x: s.width / 2,
+      y: s.height / 2,
+      angle: -33,
+    };
   };
 
-  const incXY = () => {
-    ship.x++;
-    ship.y++;
+  const shipLogic = () => {
+    s.translate(ship.x, ship.y);
+    s.rotate(s.radians(ship.angle));
+    s.fill(150);
+    s.rect(0, 0, 100, 10);
   };
-  const blueSwirl = () => {
-    s.translate(s.width / 2, s.height / 2);
-    s.rotate(ship.angle);
-    ship.angle++;
-    s.fill(10, 50, 230);
-    s.rect(ship.x, ship.y, 100, 5);
-  };
-  const redSwirl = () => {
-    // s.translate(s.width / 2, s.height / 2);
-    // s.rotate(ship.angle);
-    ship.angle++;
-    s.fill(250, 50, 100);
-    s.rect(ship.x + 5, ship.y + 5, 100, 5);
-  };
-  const rotateShip = () => {};
   s.draw = () => {
-    blueSwirl();
-    redSwirl();
-    incXY();
+    s.background(100);
+    s.rect(s.width / 4, s.height / 4, 100, 30);
+    shipLogic();
   };
 });
 

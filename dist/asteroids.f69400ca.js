@@ -101477,44 +101477,32 @@ Object.defineProperty(exports, "__esModule", {
 
 var p5_1 = __importDefault(require("p5"));
 
+console.log("force");
 var App = new p5_1.default(function (s) {
-  var ship = {
-    x: 10,
-    y: 10,
-    angle: 1
-  };
+  var ship;
 
   s.setup = function () {
-    s.createCanvas(800, 800); // s.background(100);
+    s.createCanvas(800, 800);
+    s.background(100);
+    s.frameRate(20);
+    ship = {
+      x: s.width / 2,
+      y: s.height / 2,
+      angle: -33
+    };
   };
 
-  var incXY = function incXY() {
-    ship.x++;
-    ship.y++;
+  var shipLogic = function shipLogic() {
+    s.translate(ship.x, ship.y);
+    s.rotate(s.radians(ship.angle));
+    s.fill(150);
+    s.rect(0, 0, 100, 10);
   };
-
-  var blueSwirl = function blueSwirl() {
-    s.translate(s.width / 2, s.height / 2);
-    s.rotate(ship.angle);
-    ship.angle++;
-    s.fill(10, 50, 230);
-    s.rect(ship.x, ship.y, 100, 5);
-  };
-
-  var redSwirl = function redSwirl() {
-    // s.translate(s.width / 2, s.height / 2);
-    // s.rotate(ship.angle);
-    ship.angle++;
-    s.fill(250, 50, 100);
-    s.rect(ship.x + 5, ship.y + 5, 100, 5);
-  };
-
-  var rotateShip = function rotateShip() {};
 
   s.draw = function () {
-    blueSwirl();
-    redSwirl();
-    incXY();
+    s.background(100);
+    s.rect(s.width / 4, s.height / 4, 100, 30);
+    shipLogic();
   };
 });
 exports.default = App;
@@ -101546,7 +101534,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57781" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65264" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
