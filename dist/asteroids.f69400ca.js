@@ -101478,24 +101478,24 @@ Object.defineProperty(exports, "__esModule", {
 var p5_1 = __importDefault(require("p5"));
 
 var App = new p5_1.default(function (s) {
-  var rotatedArray = [];
   var ship = {
-    x: 100,
-    y: 100,
+    x: 1,
+    y: 1,
     angle: 1
   };
 
   s.setup = function () {
     s.createCanvas(800, 800);
+    s.frameRate(30);
     s.background(100);
   };
 
   s.draw = function () {
+    s.background(100);
     s.fill(10, 50, 230);
-    s.translate(s.width / 2, s.height / 2);
-    s.rotate(ship.angle);
+    var withSin = Math.sin(ship.angle) * 100;
+    s.translate(s.width / 2 + withSin, s.height / 2);
     s.rect(ship.x, ship.y, 100, 20);
-    rotatedArray.push([ship.x, ship.y]);
     ship.angle++;
   };
 });

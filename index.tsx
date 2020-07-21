@@ -7,23 +7,23 @@ interface shipI {
 }
 
 const App = new p5((s: p5) => {
-  const rotatedArray: number[][] = [];
   let ship: shipI = {
-    x: 100,
-    y: 100,
+    x: 1,
+    y: 1,
     angle: 1,
   };
   s.setup = () => {
     s.createCanvas(800, 800);
+    s.frameRate(30);
     s.background(100);
   };
 
   s.draw = () => {
+    s.background(100);
     s.fill(10, 50, 230);
-    s.translate(s.width / 2, s.height / 2);
-    s.rotate(ship.angle);
+    let withSin = Math.sin(ship.angle) * 100;
+    s.translate(s.width / 2 + withSin, s.height / 2);
     s.rect(ship.x, ship.y, 100, 20);
-    rotatedArray.push([ship.x, ship.y]);
     ship.angle++;
   };
 });
