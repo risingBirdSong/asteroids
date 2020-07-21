@@ -101481,22 +101481,40 @@ var App = new p5_1.default(function (s) {
   var ship = {
     x: 10,
     y: 10,
-    angle: 0
+    angle: 1
   };
 
   s.setup = function () {
-    s.createCanvas(800, 800);
-    s.background(100);
+    s.createCanvas(800, 800); // s.background(100);
   };
 
-  s.draw = function () {
-    s.translate(s.width / 2, s.height / 2);
-    s.fill(10, 50, 230);
-    s.rotate(ship.angle);
-    s.rect(ship.x, ship.y, 100, 20);
-    ship.angle++;
+  var incXY = function incXY() {
     ship.x++;
     ship.y++;
+  };
+
+  var blueSwirl = function blueSwirl() {
+    s.translate(s.width / 2, s.height / 2);
+    s.rotate(ship.angle);
+    ship.angle++;
+    s.fill(10, 50, 230);
+    s.rect(ship.x, ship.y, 100, 5);
+  };
+
+  var redSwirl = function redSwirl() {
+    // s.translate(s.width / 2, s.height / 2);
+    s.rotate(ship.angle);
+    ship.angle++;
+    s.fill(250, 50, 100);
+    s.rect(ship.x + 5, ship.y + 5, 100, 5);
+  };
+
+  var rotateShip = function rotateShip() {};
+
+  s.draw = function () {
+    blueSwirl();
+    redSwirl();
+    incXY();
   };
 });
 exports.default = App;
@@ -101528,7 +101546,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57435" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57781" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
