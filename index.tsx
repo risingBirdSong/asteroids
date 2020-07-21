@@ -6,6 +6,7 @@ interface shipI {
   angle: number;
 }
 
+console.log("force");
 const App = new p5((s: p5) => {
   let ship: shipI = {
     x: 10,
