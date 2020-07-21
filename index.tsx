@@ -8,22 +8,26 @@ interface shipI {
 
 const App = new p5((s: p5) => {
   let ship: shipI = {
-    x: 1,
+    x: 10,
     y: 1,
     angle: 1,
   };
   s.setup = () => {
     s.createCanvas(800, 800);
-    s.frameRate(30);
+    s.frameRate(12);
     s.background(100);
   };
 
   s.draw = () => {
     s.background(100);
     s.fill(10, 50, 230);
-    let withSin = Math.sin(ship.angle) * 100;
-    s.translate(s.width / 2 + withSin, s.height / 2);
-    s.rect(ship.x, ship.y, 100, 20);
+    let withSin = Math.sin(ship.angle) * 20;
+    let withCos = Math.cos(ship.angle) * 20;
+    s.translate(s.width / 2 + withSin, s.height / 2 + withCos);
+    s.ellipse(ship.x + withSin * 2, ship.y + withCos * 2, 30, 30);
+    s.ellipse(ship.x + withSin, ship.y + withCos, 20, 20);
+    s.ellipse(ship.x, ship.y, 15, 15);
+    s.ellipse(ship.x - withSin, ship.y - withCos, 10, 10);
     ship.angle++;
   };
 });
