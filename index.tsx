@@ -4,6 +4,8 @@ interface shipI {
   x: number;
   y: number;
   angle: number;
+  speed: number;
+  angleChange: number;
 }
 
 console.log("force");
@@ -11,13 +13,15 @@ const App = new p5((s: p5) => {
   let ship: shipI;
   let showOnce = true;
   s.setup = () => {
-    s.createCanvas(800, 800);
+    s.createCanvas(1000, 1000);
     s.background(100);
     // s.frameRate(20);
     ship = {
       x: s.width / 2,
       y: s.height / 2,
       angle: 0,
+      speed: 3,
+      angleChange: 4,
     };
   };
 
@@ -49,49 +53,84 @@ const App = new p5((s: p5) => {
   const logger = () => {
     if (showOnce) {
       showOnce = false;
-      console.clear();
-      console.log("keycode", s.keyCode);
-      console.log("ship angle", ship.angle);
-      console.log("sin", Math.sin(ship.angle) * 10);
-      console.log("cos", Math.cos(ship.angle) * 10);
-      // ship.x += Math.sin(ship.angle) *2
+      console.log("key", s.keyCode);
       setTimeout(() => {
         showOnce = true;
       }, 1000);
     }
   };
-  //todo, log radians and understand whats going on
-  s.draw = () => {
-    logger();
-    if (s.keyIsDown(s.LEFT_ARROW) && s.keyIsDown(s.UP_ARROW)) {
-      ship.angle -= 3;
+  const handleLeftAndForward = () => {
+    if (s.keyIsDown(s.UP_ARROW) && s.keyIsDown(s.LEFT_ARROW)) {
+      ship.angle -= ship.angleChange;
       let radians = (Math.PI * ship.angle) / 180;
       ship.x += Math.cos(radians);
       ship.y += Math.sin(radians);
     }
-    if (s.keyIsDown(s.RIGHT_ARROW) && s.keyIsDown(s.UP_ARROW)) {
-      ship.angle += 3;
+  };
+
+  const increaseSpeed = () => {
+    if (s.keyIsDown(87)) {
+      ship.speed += 0.1;
+    }
+  };
+  const decreaseSpeed = () => {
+    if (s.keyIsDown(83)) {
+      ship.speed -= 0.1;
+    }
+    if (ship.speed < 0) {
+      ship.speed = 0;
+    }
+  };
+
+  const handleRightAndForward = () => {
+    if (s.keyIsDown(s.UP_ARROW) && s.keyIsDown(s.RIGHT_ARROW)) {
+      ship.angle += ship.angleChange;
       let radians = (Math.PI * ship.angle) / 180;
       ship.x += Math.cos(radians);
       ship.y += Math.sin(radians);
     }
+  };
+
+  const handleLeft = () => {
     if (s.keyIsPressed && s.keyCode === s.LEFT_ARROW) {
-      ship.angle -= 3;
+      ship.angle -= ship.angleChange;
     }
+  };
+  const handleRight = () => {
     if (s.keyIsPressed && s.keyCode === s.RIGHT_ARROW) {
-      ship.angle += 3;
+      ship.angle += ship.angleChange;
     }
+  };
+  const handleUp = () => {
     if (s.keyIsPressed && s.keyCode === s.UP_ARROW) {
       let radians = (Math.PI * ship.angle) / 180;
-      ship.x += Math.cos(radians);
-      ship.y += Math.sin(radians);
+      ship.x += Math.cos(radians) * ship.speed;
+      ship.y += Math.sin(radians) * ship.speed;
     }
+  };
+
+  const handleDown = () => {
     if (s.keyIsPressed && s.keyCode === s.DOWN_ARROW) {
       ship.x -= Math.cos(ship.angle) * 5;
       ship.y -= Math.sin(ship.angle) * 5;
     }
+  };
+
+  const handleDirections = () => {
+    handleLeftAndForward();
+    handleRightAndForward();
+    handleLeft();
+    handleRight();
+    handleUp();
+    handleDown();
+  };
+  //todo, log radians and understand whats going on
+  s.draw = () => {
+    logger();
+    handleDirections();
+    increaseSpeed();
+    decreaseSpeed();
     s.background(100);
-    s.rect(s.width / 4, s.height / 4, 100, 30);
     shipLogic();
   };
 });
