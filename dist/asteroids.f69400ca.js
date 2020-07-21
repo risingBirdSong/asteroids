@@ -101478,6 +101478,7 @@ Object.defineProperty(exports, "__esModule", {
 var p5_1 = __importDefault(require("p5"));
 
 var App = new p5_1.default(function (s) {
+  var counter = 0;
   var ship = {
     x: 10,
     y: 1,
@@ -101491,15 +101492,17 @@ var App = new p5_1.default(function (s) {
   };
 
   s.draw = function () {
+    counter++;
     s.background(100);
     s.fill(10, 50, 230);
     var withSin = Math.sin(ship.angle) * 20;
-    var withTan = Math.tan(ship.angle) * 20;
-    s.translate(s.width / 2 + withSin, s.height / 2 + withTan);
-    s.ellipse(ship.x + withSin * 2, ship.y + withTan * 2, 30, 30);
-    s.ellipse(ship.x + withSin, ship.y + withTan, 20, 20);
+    var withCos = Math.cos(ship.angle) * 20;
+    s.translate(s.width / 2 + withSin, s.height / 2 + withCos);
+    s.rotate(Math.tan(ship.angle));
+    s.ellipse(ship.x + withSin * 2, ship.y + withCos * 2, 30, 30);
+    s.ellipse(ship.x + withSin, ship.y + withCos, 20, 20);
     s.ellipse(ship.x, ship.y, 15, 15);
-    s.ellipse(ship.x - withSin / 2, ship.y - withTan / 2, 10, 10);
+    s.ellipse(ship.x - withSin / 2, ship.y - withCos / 2, 10, 10);
     ship.angle++;
   };
 });

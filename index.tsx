@@ -7,6 +7,7 @@ interface shipI {
 }
 
 const App = new p5((s: p5) => {
+  let counter = 0;
   let ship: shipI = {
     x: 10,
     y: 1,
@@ -19,15 +20,17 @@ const App = new p5((s: p5) => {
   };
 
   s.draw = () => {
+    counter++;
     s.background(100);
     s.fill(10, 50, 230);
     let withSin = Math.sin(ship.angle) * 20;
-    let withTan = Math.tan(ship.angle) * 20;
-    s.translate(s.width / 2 + withSin, s.height / 2 + withTan);
-    s.ellipse(ship.x + withSin * 2, ship.y + withTan * 2, 30, 30);
-    s.ellipse(ship.x + withSin, ship.y + withTan, 20, 20);
+    let withCos = Math.cos(ship.angle) * 20;
+    s.translate(s.width / 2 + withSin, s.height / 2 + withCos);
+    s.rotate(Math.tan(ship.angle));
+    s.ellipse(ship.x + withSin * 2, ship.y + withCos * 2, 30, 30);
+    s.ellipse(ship.x + withSin, ship.y + withCos, 20, 20);
     s.ellipse(ship.x, ship.y, 15, 15);
-    s.ellipse(ship.x - withSin / 2, ship.y - withTan / 2, 10, 10);
+    s.ellipse(ship.x - withSin / 2, ship.y - withCos / 2, 10, 10);
     ship.angle++;
   };
 });
