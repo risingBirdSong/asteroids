@@ -43,8 +43,8 @@ const App = new p5((s: p5) => {
       angleChange: 5,
     };
     singleAsteroid = {
-      x: 0,
-      y: 0,
+      x: s.width / 2,
+      y: s.height / 2,
       angle: 33,
       speed: 1,
       angleChange: 3,
@@ -175,15 +175,15 @@ const App = new p5((s: p5) => {
 
   const handleasteroid = () => {
     singleAsteroid.angle += singleAsteroid.angleChange;
-    singleAsteroid.x += singleAsteroid.speed;
-    singleAsteroid.y += singleAsteroid.speed;
+    // singleAsteroid.x += singleAsteroid.speed;
+    // singleAsteroid.y += singleAsteroid.speed;
     s.push();
     s.translate(singleAsteroid.x, singleAsteroid.y);
     s.rotate(s.radians(singleAsteroid.angle));
     s.fill(102, 0, 204);
     s.stroke(150);
     s.strokeWeight(10);
-    s.rect(0, 0, 100, 100);
+    s.rect(-50, -50, 100, 100);
     s.pop();
   };
   //todo, log radians and understand whats going on
