@@ -8,10 +8,18 @@ interface shipI {
   angleChange: number;
 }
 
-console.log("force");
+interface bulletI {
+  x: number;
+  y: number;
+  speed: number;
+  radians: number;
+}
+let showOnce = true;
+
 const App = new p5((s: p5) => {
+  let bullets: bulletI[] = [];
+  let bullet: bulletI;
   let ship: shipI;
-  let showOnce = true;
   s.setup = () => {
     s.createCanvas(1000, 1000);
     s.background(100);
@@ -24,20 +32,6 @@ const App = new p5((s: p5) => {
       angleChange: 5,
     };
   };
-
-  // s.keyPressed = () => {
-  //   switch (s.keyCode) {
-  //     case s.LEFT_ARROW:
-  //       ship.angle--;
-  //       break;
-  //     case s.UP_ARROW:
-  //       ship.angle++;
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  //   console.log(s.keyCode);
-  // };
 
   const shipLogic = () => {
     s.translate(ship.x, ship.y);
@@ -54,9 +48,14 @@ const App = new p5((s: p5) => {
   };
 
   const logger = () => {
-    if (showOnce) {
+    if (showOnce === true) {
       showOnce = false;
-      console.log("key", s.keyCode);
+      console.clear();
+      let radians = (Math.PI * ship.angle) / 180;
+      // console.log("ship angle", ship.angle);
+      // console.log("up radians", radians);
+      // console.log("cos rads", Math.cos(radians) * 10);
+      // console.log("sin rads", Math.sin(radians) * 10);
       setTimeout(() => {
         showOnce = true;
       }, 1000);
@@ -78,13 +77,16 @@ const App = new p5((s: p5) => {
   };
   const increaseAngleSpeed = () => {
     if (s.keyIsDown(69)) {
-      console.log("angle ++");
       ship.angleChange += 0.3;
     }
   };
   const decreaseAngleSpeed = () => {
     if (s.keyIsDown(81)) {
+      console.log("q");
       ship.angleChange -= 0.3;
+    }
+    if (ship.angleChange < 0) {
+      ship.angleChange = 0.2;
     }
   };
 
@@ -121,6 +123,22 @@ const App = new p5((s: p5) => {
       let radians = (Math.PI * ship.angle) / 180;
       ship.x += Math.cos(radians) * ship.speed;
       ship.y += Math.sin(radians) * ship.speed;
+      console.log("up radians", radians);
+      console.log("cos rads", Math.cos(radians));
+      console.log("sin rads", Math.sin(radians));
+    }
+  };
+
+  const shoot = () => {
+    if (s.keyIsPressed && s.keyCode === 32) {
+      console.log("shooting");
+      let bulletRadians = (Math.PI * ship.angle) / 180;
+      bullet = {
+        x: ship.x,
+        y: ship.y,
+        speed: 3,
+        radians: bulletRadians,
+      };
     }
   };
 
@@ -141,13 +159,29 @@ const App = new p5((s: p5) => {
   };
   //todo, log radians and understand whats going on
   s.draw = () => {
-    logger();
+    // logger();
     handleDirections();
     increaseSpeed();
     decreaseSpeed();
     increaseAngleSpeed();
     decreaseAngleSpeed();
-    s.background(100);
+    shoot();
+    // s.background(100);
+    if (bullet) {
+      if (
+        bullet.x > 0 &&
+        bullet.x < s.width &&
+        bullet.y > 0 &&
+        bullet.y < s.height
+      ) {
+        console.log("bullet exists", "x", bullet.x, "y", bullet.y);
+        s.fill(204, 101, 192, 127);
+        s.stroke(127, 63, 120);
+        s.ellipse(bullet.x, bullet.y, 30, 30);
+        bullet.x += Math.cos(bullet.radians) * bullet.speed;
+        bullet.y += Math.sin(bullet.radians) * bullet.speed;
+      }
+    }
     shipLogic();
   };
 });
