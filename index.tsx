@@ -22,6 +22,7 @@ interface asteroidI {
   speed: number;
   angle: number;
   angleChange: number;
+  hitpoints: number;
 }
 let showOnce = true;
 
@@ -49,7 +50,8 @@ const App = new p5((s: p5) => {
       angle: 33,
       speed: 1,
       angleChange: 3,
-      width: 25,
+      width: 100,
+      hitpoints: 10,
     };
   };
 
@@ -178,12 +180,16 @@ const App = new p5((s: p5) => {
   };
 
   const handleasteroid = () => {
-    singleAsteroid.angle += singleAsteroid.angleChange;
+    // singleAsteroid.angle += singleAsteroid.angleChange;
     // singleAsteroid.x += singleAsteroid.speed;
     // singleAsteroid.y += singleAsteroid.speed;
-    // s.push();
+    // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
+    s.push();
+
     s.translate(singleAsteroid.x, singleAsteroid.y);
-    s.rotate(s.radians(singleAsteroid.angle));
+    let rdns = s.radians(singleAsteroid.angle);
+    s.rotate(rdns);
+
     s.fill(102, 0, 204);
     s.stroke(150);
     s.strokeWeight(10);
@@ -193,7 +199,43 @@ const App = new p5((s: p5) => {
       singleAsteroid.width,
       singleAsteroid.width
     );
-    // s.pop();
+    s.stroke(10);
+    s.strokeWeight(2);
+    s.fill(200, 10, 50);
+    s.rect(
+      -singleAsteroid.width / 2,
+      -singleAsteroid.width / 2,
+      singleAsteroid.width / 10,
+      singleAsteroid.width / 10
+    );
+    // let translationX = Math.cos(rdns) * singleAsteroid.width;
+    // let translationY = Math.sin(rdns) * singleAsteroid.width;
+    s.stroke(75);
+    s.strokeWeight(5);
+    s.line(
+      -singleAsteroid.width / 2,
+      -singleAsteroid.width / 2,
+      rdns * singleAsteroid.width,
+      -rdns * singleAsteroid.width
+    );
+    s.line(
+      -singleAsteroid.width / 2,
+      -singleAsteroid.width / 2,
+      -rdns * singleAsteroid.width,
+      rdns * singleAsteroid.width
+    );
+    console.log("rdns", rdns);
+    s.translate(100, 0);
+    s.stroke(10);
+    s.strokeWeight(2);
+    s.fill(1, 200, 50);
+    s.rect(
+      -singleAsteroid.width / 2,
+      -singleAsteroid.width / 2,
+      singleAsteroid.width / 10,
+      singleAsteroid.width / 10
+    );
+    s.pop();
   };
   //todo, log radians and understand whats going on
   setInterval(() => {
@@ -207,10 +249,10 @@ const App = new p5((s: p5) => {
     decreaseSpeed();
     increaseAngleSpeed();
     decreaseAngleSpeed();
+    s.background(100);
     if (clock % 2 === 0) {
       shoot();
     }
-    s.background(100);
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];
       if (bllt) {
