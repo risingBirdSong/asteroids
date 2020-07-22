@@ -101478,6 +101478,7 @@ Object.defineProperty(exports, "__esModule", {
 var p5_1 = __importDefault(require("p5"));
 
 var showOnce = true;
+var clock = 0;
 var App = new p5_1.default(function (s) {
   var bullets = [];
   var bullet;
@@ -101514,7 +101515,8 @@ var App = new p5_1.default(function (s) {
     if (showOnce === true) {
       showOnce = false;
       console.clear();
-      var radians = Math.PI * ship.angle / 180; // console.log("ship angle", ship.angle);
+      var radians = Math.PI * ship.angle / 180;
+      console.log("bllts length", bullets.length); // console.log("ship angle", ship.angle);
       // console.log("up radians", radians);
       // console.log("cos rads", Math.cos(radians) * 10);
       // console.log("sin rads", Math.sin(radians) * 10);
@@ -101542,14 +101544,14 @@ var App = new p5_1.default(function (s) {
 
   var increaseAngleSpeed = function increaseAngleSpeed() {
     if (s.keyIsDown(69)) {
-      ship.angleChange += 0.3;
+      ship.angleChange += 0.1;
     }
   };
 
   var decreaseAngleSpeed = function decreaseAngleSpeed() {
     if (s.keyIsDown(81)) {
       console.log("q");
-      ship.angleChange -= 0.3;
+      ship.angleChange -= 0.1;
     }
 
     if (ship.angleChange < 0) {
@@ -101577,38 +101579,35 @@ var App = new p5_1.default(function (s) {
   };
 
   var handleLeft = function handleLeft() {
-    if (s.keyIsDown && s.keyCode === s.LEFT_ARROW) {
+    if (s.keyIsDown(s.LEFT_ARROW)) {
       ship.angle -= ship.angleChange * 2;
     }
   };
 
   var handleRight = function handleRight() {
-    if (s.keyIsDown && s.keyCode === s.RIGHT_ARROW) {
+    if (s.keyIsDown(s.RIGHT_ARROW)) {
       ship.angle += ship.angleChange * 2;
     }
   };
 
   var handleUp = function handleUp() {
-    if (s.keyIsDown && s.keyCode === s.UP_ARROW) {
+    if (s.keyIsDown(s.UP_ARROW)) {
       var radians = Math.PI * ship.angle / 180;
       ship.x += Math.cos(radians) * ship.speed;
       ship.y += Math.sin(radians) * ship.speed;
-      console.log("up radians", radians);
-      console.log("cos rads", Math.cos(radians));
-      console.log("sin rads", Math.sin(radians));
     }
   };
 
   var shoot = function shoot() {
-    if (s.keyIsDown && s.keyCode === 32) {
-      console.log("shooting");
+    if (s.keyIsDown(32)) {
       var bulletRadians = Math.PI * ship.angle / 180;
-      bullet = {
+      var bllt = {
         x: ship.x,
         y: ship.y,
         speed: 8,
         radians: bulletRadians
       };
+      bullets.push(bllt);
     }
   };
 
@@ -101620,33 +101619,42 @@ var App = new p5_1.default(function (s) {
   };
 
   var handleDirections = function handleDirections() {
-    handleLeftAndForward();
-    handleRightAndForward();
+    // handleLeftAndForward();
+    // handleRightAndForward();
     handleLeft();
     handleRight();
-    handleUp();
-    handleDown();
+    handleUp(); // handleDown();
   }; //todo, log radians and understand whats going on
 
 
   s.draw = function () {
-    // logger();
+    clock++;
+    logger();
     handleDirections();
     increaseSpeed();
     decreaseSpeed();
     increaseAngleSpeed();
     decreaseAngleSpeed();
-    shoot();
+
+    if (clock % 2 === 0) {
+      shoot();
+    }
+
     s.background(100);
 
-    if (bullet) {
-      if (bullet.x > 0 && bullet.x < s.width && bullet.y > 0 && bullet.y < s.height) {
-        console.log("bullet exists", "x", bullet.x, "y", bullet.y);
-        s.fill(204, 101, 192, 127);
-        s.stroke(127, 63, 120);
-        s.ellipse(bullet.x, bullet.y, 30, 30);
-        bullet.x += Math.cos(bullet.radians) * bullet.speed;
-        bullet.y += Math.sin(bullet.radians) * bullet.speed;
+    for (var i = 0; i < bullets.length; i++) {
+      var bllt = bullets[i];
+
+      if (bllt) {
+        if (bllt.x > 0 && bllt.x < s.width && bllt.y > 0 && bllt.y < s.height) {
+          s.fill(204, 101, 192, 127);
+          s.stroke(127, 63, 120);
+          s.ellipse(bllt.x, bllt.y, 10, 10);
+          bllt.x += Math.cos(bllt.radians) * bllt.speed;
+          bllt.y += Math.sin(bllt.radians) * bllt.speed;
+        } else {
+          bullets.splice(i, 1);
+        }
       }
     }
 
