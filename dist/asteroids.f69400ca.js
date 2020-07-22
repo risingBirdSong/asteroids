@@ -101501,7 +101501,8 @@ var App = new p5_1.default(function (s) {
       y: s.height / 2,
       angle: 33,
       speed: 1,
-      angleChange: 3
+      angleChange: 3,
+      width: 25
     };
   };
 
@@ -101643,7 +101644,7 @@ var App = new p5_1.default(function (s) {
     s.fill(102, 0, 204);
     s.stroke(150);
     s.strokeWeight(10);
-    s.rect(-50, -50, 100, 100);
+    s.rect(-singleAsteroid.width / 2, -singleAsteroid.width / 2, singleAsteroid.width, singleAsteroid.width);
     s.pop();
   }; //todo, log radians and understand whats going on
 
