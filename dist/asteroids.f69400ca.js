@@ -101480,6 +101480,7 @@ var p5_1 = __importDefault(require("p5"));
 var showOnce = true;
 var clock = 0;
 var App = new p5_1.default(function (s) {
+  var singleAsteroid;
   var bullets = [];
   var bullet;
   var ship;
@@ -101494,6 +101495,13 @@ var App = new p5_1.default(function (s) {
       angle: 0,
       speed: 3,
       angleChange: 5
+    };
+    singleAsteroid = {
+      x: 0,
+      y: 0,
+      angle: 33,
+      speed: 1,
+      angleChange: 3
     };
   };
 
@@ -101515,8 +101523,7 @@ var App = new p5_1.default(function (s) {
     if (showOnce === true) {
       showOnce = false;
       console.clear();
-      var radians = Math.PI * ship.angle / 180;
-      console.log("bllts length", bullets.length); // console.log("ship angle", ship.angle);
+      var radians = Math.PI * ship.angle / 180; // console.log("ship angle", ship.angle);
       // console.log("up radians", radians);
       // console.log("cos rads", Math.cos(radians) * 10);
       // console.log("sin rads", Math.sin(radians) * 10);
@@ -101624,12 +101631,30 @@ var App = new p5_1.default(function (s) {
     handleLeft();
     handleRight();
     handleUp(); // handleDown();
+  };
+
+  var handleasteroid = function handleasteroid() {
+    singleAsteroid.angle += singleAsteroid.angleChange;
+    singleAsteroid.x += singleAsteroid.speed;
+    singleAsteroid.y += singleAsteroid.speed;
+    s.push();
+    s.translate(singleAsteroid.x, singleAsteroid.y);
+    s.rotate(s.radians(singleAsteroid.angle));
+    s.fill(102, 0, 204);
+    s.stroke(150);
+    s.strokeWeight(10);
+    s.rect(0, 0, 100, 100);
+    s.pop();
   }; //todo, log radians and understand whats going on
 
 
+  setInterval(function () {
+    console.clear();
+  }, 1000);
+
   s.draw = function () {
-    clock++;
-    logger();
+    clock++; // logger();
+
     handleDirections();
     increaseSpeed();
     decreaseSpeed();
@@ -101656,9 +101681,10 @@ var App = new p5_1.default(function (s) {
           bullets.splice(i, 1);
         }
       }
-    }
+    } // shipLogic();
 
-    shipLogic();
+
+    handleasteroid();
   };
 });
 exports.default = App;
@@ -101690,7 +101716,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50487" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56913" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
