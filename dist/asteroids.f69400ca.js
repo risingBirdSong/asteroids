@@ -101477,26 +101477,188 @@ Object.defineProperty(exports, "__esModule", {
 
 var p5_1 = __importDefault(require("p5"));
 
+var showOnce = true;
+var clock = 0;
 var App = new p5_1.default(function (s) {
-  var ship = {
-    x: 10,
-    y: 10,
-    angle: 0
-  };
+  var bullets = [];
+  var bullet;
+  var ship;
 
   s.setup = function () {
-    s.createCanvas(800, 800);
-    s.background(100);
+    s.createCanvas(700, 700);
+    s.background(100); // s.frameRate(20);
+
+    ship = {
+      x: s.width / 2,
+      y: s.height / 2,
+      angle: 0,
+      speed: 3,
+      angleChange: 5
+    };
   };
 
+  var shipLogic = function shipLogic() {
+    s.translate(ship.x, ship.y);
+    s.rotate(s.radians(ship.angle));
+    s.stroke(50); // s.rect(0, 0, 100, 30);
+    // s.fill(200);
+    // s.rect(0, 0, 10, 30);
+
+    s.strokeWeight(10);
+    s.strokeCap("round");
+    s.line(0, 0, 40, 0);
+    s.stroke(200, 1, 100);
+    s.ellipse(0, 0, 4, 4);
+  };
+
+  var logger = function logger() {
+    if (showOnce === true) {
+      showOnce = false;
+      console.clear();
+      var radians = Math.PI * ship.angle / 180;
+      console.log("bllts length", bullets.length); // console.log("ship angle", ship.angle);
+      // console.log("up radians", radians);
+      // console.log("cos rads", Math.cos(radians) * 10);
+      // console.log("sin rads", Math.sin(radians) * 10);
+
+      setTimeout(function () {
+        showOnce = true;
+      }, 1000);
+    }
+  };
+
+  var handleLeftAndForward = function handleLeftAndForward() {
+    if (s.keyIsDown(s.UP_ARROW) && s.keyIsDown(s.LEFT_ARROW)) {
+      ship.angle -= ship.angleChange;
+      var radians = Math.PI * ship.angle / 180;
+      ship.x += Math.cos(radians);
+      ship.y += Math.sin(radians);
+    }
+  };
+
+  var increaseSpeed = function increaseSpeed() {
+    if (s.keyIsDown(87)) {
+      ship.speed += 0.1;
+    }
+  };
+
+  var increaseAngleSpeed = function increaseAngleSpeed() {
+    if (s.keyIsDown(69)) {
+      ship.angleChange += 0.1;
+    }
+  };
+
+  var decreaseAngleSpeed = function decreaseAngleSpeed() {
+    if (s.keyIsDown(81)) {
+      console.log("q");
+      ship.angleChange -= 0.1;
+    }
+
+    if (ship.angleChange < 0) {
+      ship.angleChange = 0.2;
+    }
+  };
+
+  var decreaseSpeed = function decreaseSpeed() {
+    if (s.keyIsDown(83)) {
+      ship.speed -= 0.1;
+    }
+
+    if (ship.speed < 0) {
+      ship.speed = 0;
+    }
+  };
+
+  var handleRightAndForward = function handleRightAndForward() {
+    if (s.keyIsDown(s.UP_ARROW) && s.keyIsDown(s.RIGHT_ARROW)) {
+      ship.angle += ship.angleChange;
+      var radians = Math.PI * ship.angle / 180;
+      ship.x += Math.cos(radians);
+      ship.y += Math.sin(radians);
+    }
+  };
+
+  var handleLeft = function handleLeft() {
+    if (s.keyIsDown(s.LEFT_ARROW)) {
+      ship.angle -= ship.angleChange * 2;
+    }
+  };
+
+  var handleRight = function handleRight() {
+    if (s.keyIsDown(s.RIGHT_ARROW)) {
+      ship.angle += ship.angleChange * 2;
+    }
+  };
+
+  var handleUp = function handleUp() {
+    if (s.keyIsDown(s.UP_ARROW)) {
+      var radians = Math.PI * ship.angle / 180;
+      ship.x += Math.cos(radians) * ship.speed;
+      ship.y += Math.sin(radians) * ship.speed;
+    }
+  };
+
+  var shoot = function shoot() {
+    if (s.keyIsDown(32)) {
+      var bulletRadians = Math.PI * ship.angle / 180;
+      var bllt = {
+        x: ship.x,
+        y: ship.y,
+        speed: 8,
+        radians: bulletRadians
+      };
+      bullets.push(bllt);
+    }
+  };
+
+  var handleDown = function handleDown() {
+    if (s.keyIsPressed && s.keyCode === s.DOWN_ARROW) {
+      ship.x -= Math.cos(ship.angle) * 5;
+      ship.y -= Math.sin(ship.angle) * 5;
+    }
+  };
+
+  var handleDirections = function handleDirections() {
+    // handleLeftAndForward();
+    // handleRightAndForward();
+    handleLeft();
+    handleRight();
+    handleUp(); // handleDown();
+  }; //todo, log radians and understand whats going on
+
+
   s.draw = function () {
-    s.translate(s.width / 2, s.height / 2);
-    s.fill(10, 50, 230);
-    s.rotate(ship.angle);
-    s.rect(ship.x, ship.y, 100, 20);
-    ship.angle++;
-    ship.x++;
-    ship.y++;
+    clock++;
+    logger();
+    handleDirections();
+    increaseSpeed();
+    decreaseSpeed();
+    increaseAngleSpeed();
+    decreaseAngleSpeed();
+
+    if (clock % 2 === 0) {
+      shoot();
+    }
+
+    s.background(100);
+
+    for (var i = 0; i < bullets.length; i++) {
+      var bllt = bullets[i];
+
+      if (bllt) {
+        if (bllt.x > 0 && bllt.x < s.width && bllt.y > 0 && bllt.y < s.height) {
+          s.fill(204, 101, 192, 127);
+          s.stroke(127, 63, 120);
+          s.ellipse(bllt.x, bllt.y, 10, 10);
+          bllt.x += Math.cos(bllt.radians) * bllt.speed;
+          bllt.y += Math.sin(bllt.radians) * bllt.speed;
+        } else {
+          bullets.splice(i, 1);
+        }
+      }
+    }
+
+    shipLogic();
   };
 });
 exports.default = App;
@@ -101528,7 +101690,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57435" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50487" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
