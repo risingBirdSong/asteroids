@@ -21,7 +21,7 @@ const App = new p5((s: p5) => {
   let bullet: bulletI;
   let ship: shipI;
   s.setup = () => {
-    s.createCanvas(1000, 1000);
+    s.createCanvas(700, 700);
     s.background(100);
     // s.frameRate(20);
     ship = {
@@ -109,17 +109,17 @@ const App = new p5((s: p5) => {
   };
 
   const handleLeft = () => {
-    if (s.keyIsPressed && s.keyCode === s.LEFT_ARROW) {
+    if (s.keyIsDown && s.keyCode === s.LEFT_ARROW) {
       ship.angle -= ship.angleChange * 2;
     }
   };
   const handleRight = () => {
-    if (s.keyIsPressed && s.keyCode === s.RIGHT_ARROW) {
+    if (s.keyIsDown && s.keyCode === s.RIGHT_ARROW) {
       ship.angle += ship.angleChange * 2;
     }
   };
   const handleUp = () => {
-    if (s.keyIsPressed && s.keyCode === s.UP_ARROW) {
+    if (s.keyIsDown && s.keyCode === s.UP_ARROW) {
       let radians = (Math.PI * ship.angle) / 180;
       ship.x += Math.cos(radians) * ship.speed;
       ship.y += Math.sin(radians) * ship.speed;
@@ -130,13 +130,13 @@ const App = new p5((s: p5) => {
   };
 
   const shoot = () => {
-    if (s.keyIsPressed && s.keyCode === 32) {
+    if (s.keyIsDown && s.keyCode === 32) {
       console.log("shooting");
       let bulletRadians = (Math.PI * ship.angle) / 180;
       bullet = {
         x: ship.x,
         y: ship.y,
-        speed: 3,
+        speed: 8,
         radians: bulletRadians,
       };
     }
@@ -166,7 +166,7 @@ const App = new p5((s: p5) => {
     increaseAngleSpeed();
     decreaseAngleSpeed();
     shoot();
-    // s.background(100);
+    s.background(100);
     if (bullet) {
       if (
         bullet.x > 0 &&

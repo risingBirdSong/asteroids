@@ -101484,7 +101484,7 @@ var App = new p5_1.default(function (s) {
   var ship;
 
   s.setup = function () {
-    s.createCanvas(1000, 1000);
+    s.createCanvas(700, 700);
     s.background(100); // s.frameRate(20);
 
     ship = {
@@ -101577,19 +101577,19 @@ var App = new p5_1.default(function (s) {
   };
 
   var handleLeft = function handleLeft() {
-    if (s.keyIsPressed && s.keyCode === s.LEFT_ARROW) {
+    if (s.keyIsDown && s.keyCode === s.LEFT_ARROW) {
       ship.angle -= ship.angleChange * 2;
     }
   };
 
   var handleRight = function handleRight() {
-    if (s.keyIsPressed && s.keyCode === s.RIGHT_ARROW) {
+    if (s.keyIsDown && s.keyCode === s.RIGHT_ARROW) {
       ship.angle += ship.angleChange * 2;
     }
   };
 
   var handleUp = function handleUp() {
-    if (s.keyIsPressed && s.keyCode === s.UP_ARROW) {
+    if (s.keyIsDown && s.keyCode === s.UP_ARROW) {
       var radians = Math.PI * ship.angle / 180;
       ship.x += Math.cos(radians) * ship.speed;
       ship.y += Math.sin(radians) * ship.speed;
@@ -101600,13 +101600,13 @@ var App = new p5_1.default(function (s) {
   };
 
   var shoot = function shoot() {
-    if (s.keyIsPressed && s.keyCode === 32) {
+    if (s.keyIsDown && s.keyCode === 32) {
       console.log("shooting");
       var bulletRadians = Math.PI * ship.angle / 180;
       bullet = {
         x: ship.x,
         y: ship.y,
-        speed: 3,
+        speed: 8,
         radians: bulletRadians
       };
     }
@@ -101636,7 +101636,8 @@ var App = new p5_1.default(function (s) {
     decreaseSpeed();
     increaseAngleSpeed();
     decreaseAngleSpeed();
-    shoot(); // s.background(100);
+    shoot();
+    s.background(100);
 
     if (bullet) {
       if (bullet.x > 0 && bullet.x < s.width && bullet.y > 0 && bullet.y < s.height) {
