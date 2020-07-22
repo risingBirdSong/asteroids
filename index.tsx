@@ -54,6 +54,7 @@ const App = new p5((s: p5) => {
   };
 
   const shipLogic = () => {
+    s.push();
     s.translate(ship.x, ship.y);
     s.rotate(s.radians(ship.angle));
     s.stroke(50);
@@ -65,6 +66,7 @@ const App = new p5((s: p5) => {
     s.line(0, 0, 40, 0);
     s.stroke(200, 1, 100);
     s.ellipse(0, 0, 4, 4);
+    s.pop();
   };
 
   const logger = () => {
@@ -179,7 +181,7 @@ const App = new p5((s: p5) => {
     singleAsteroid.angle += singleAsteroid.angleChange;
     // singleAsteroid.x += singleAsteroid.speed;
     // singleAsteroid.y += singleAsteroid.speed;
-    s.push();
+    // s.push();
     s.translate(singleAsteroid.x, singleAsteroid.y);
     s.rotate(s.radians(singleAsteroid.angle));
     s.fill(102, 0, 204);
@@ -191,7 +193,7 @@ const App = new p5((s: p5) => {
       singleAsteroid.width,
       singleAsteroid.width
     );
-    s.pop();
+    // s.pop();
   };
   //todo, log radians and understand whats going on
   setInterval(() => {
@@ -223,7 +225,7 @@ const App = new p5((s: p5) => {
         }
       }
     }
-    // shipLogic();
+    shipLogic();
     handleasteroid();
   };
 });

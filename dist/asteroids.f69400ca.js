@@ -101507,6 +101507,7 @@ var App = new p5_1.default(function (s) {
   };
 
   var shipLogic = function shipLogic() {
+    s.push();
     s.translate(ship.x, ship.y);
     s.rotate(s.radians(ship.angle));
     s.stroke(50); // s.rect(0, 0, 100, 30);
@@ -101518,6 +101519,7 @@ var App = new p5_1.default(function (s) {
     s.line(0, 0, 40, 0);
     s.stroke(200, 1, 100);
     s.ellipse(0, 0, 4, 4);
+    s.pop();
   };
 
   var logger = function logger() {
@@ -101637,15 +101639,14 @@ var App = new p5_1.default(function (s) {
   var handleasteroid = function handleasteroid() {
     singleAsteroid.angle += singleAsteroid.angleChange; // singleAsteroid.x += singleAsteroid.speed;
     // singleAsteroid.y += singleAsteroid.speed;
+    // s.push();
 
-    s.push();
     s.translate(singleAsteroid.x, singleAsteroid.y);
     s.rotate(s.radians(singleAsteroid.angle));
     s.fill(102, 0, 204);
     s.stroke(150);
     s.strokeWeight(10);
-    s.rect(-singleAsteroid.width / 2, -singleAsteroid.width / 2, singleAsteroid.width, singleAsteroid.width);
-    s.pop();
+    s.rect(-singleAsteroid.width / 2, -singleAsteroid.width / 2, singleAsteroid.width, singleAsteroid.width); // s.pop();
   }; //todo, log radians and understand whats going on
 
 
@@ -101682,9 +101683,9 @@ var App = new p5_1.default(function (s) {
           bullets.splice(i, 1);
         }
       }
-    } // shipLogic();
+    }
 
-
+    shipLogic();
     handleasteroid();
   };
 });
