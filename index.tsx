@@ -40,13 +40,13 @@ const App = new p5((s: p5) => {
     ship = {
       x: s.width / 2,
       y: s.height / 2,
-      angle: 0,
+      angle: -180,
       speed: 3,
-      angleChange: 5,
+      angleChange: 3,
     };
     singleAsteroid = {
-      x: s.width / 2,
-      y: s.height / 2,
+      x: s.width / 4,
+      y: s.height / 4,
       angle: 33,
       speed: 1,
       angleChange: 3,
@@ -180,32 +180,34 @@ const App = new p5((s: p5) => {
   };
 
   const handleasteroid = () => {
-    singleAsteroid.angle += singleAsteroid.angleChange;
-    // singleAsteroid.x += singleAsteroid.speed;
-    // singleAsteroid.y += singleAsteroid.speed;
-    // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
-    s.push();
-    s.translate(singleAsteroid.x, singleAsteroid.y);
-    let rdns = s.radians(singleAsteroid.angle);
-    s.rotate(rdns);
+    if (singleAsteroid) {
+      singleAsteroid.angle += singleAsteroid.angleChange;
+      // singleAsteroid.x += singleAsteroid.speed;
+      // singleAsteroid.y += singleAsteroid.speed;
+      // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
+      s.push();
+      s.translate(singleAsteroid.x, singleAsteroid.y);
+      let rdns = s.radians(singleAsteroid.angle);
+      s.rotate(rdns);
 
-    s.fill(102, 0, 204);
-    s.stroke(150);
-    s.strokeWeight(10);
-    s.rectMode("center");
-    s.rect(0, 0, singleAsteroid.width, singleAsteroid.width);
-    s.stroke(10);
-    s.strokeWeight(2);
-    s.fill(1, 200, 50);
+      s.fill(102, 0, 204);
+      s.stroke(150);
+      s.strokeWeight(10);
+      s.rectMode("center");
+      s.rect(0, 0, singleAsteroid.width, singleAsteroid.width);
+      s.stroke(10);
+      s.strokeWeight(2);
+      s.fill(1, 200, 50);
 
-    let first = s.rect(
-      0,
-      0,
-      singleAsteroid.width / 10,
-      singleAsteroid.width / 10
-    );
+      let first = s.rect(
+        0,
+        0,
+        singleAsteroid.width / 10,
+        singleAsteroid.width / 10
+      );
 
-    s.pop();
+      s.pop();
+    }
   };
   //todo, log radians and understand whats going on
   setInterval(() => {
@@ -226,13 +228,18 @@ const App = new p5((s: p5) => {
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];
       if (bllt) {
-        if (
-          bllt.x < singleAsteroid.x + singleAsteroid.width / 2 &&
-          bllt.x > singleAsteroid.x - singleAsteroid.width / 2 &&
-          bllt.y < singleAsteroid.y + singleAsteroid.width / 2 &&
-          bllt.y > singleAsteroid.y - singleAsteroid.width / 2
-        ) {
-          console.log("hit");
+        if (singleAsteroid) {
+          if (
+            bllt.x < singleAsteroid.x + singleAsteroid.width / 2 &&
+            bllt.x > singleAsteroid.x - singleAsteroid.width / 2 &&
+            bllt.y < singleAsteroid.y + singleAsteroid.width / 2 &&
+            bllt.y > singleAsteroid.y - singleAsteroid.width / 2
+          ) {
+            singleAsteroid.width--;
+          }
+        }
+        if (singleAsteroid.width < 20) {
+          singleAsteroid.width = 0;
         }
 
         //is it on map

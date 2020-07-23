@@ -101492,13 +101492,13 @@ var App = new p5_1.default(function (s) {
     ship = {
       x: s.width / 2,
       y: s.height / 2,
-      angle: 0,
+      angle: -180,
       speed: 3,
-      angleChange: 5
+      angleChange: 3
     };
     singleAsteroid = {
-      x: s.width / 2,
-      y: s.height / 2,
+      x: s.width / 4,
+      y: s.height / 4,
       angle: 33,
       speed: 1,
       angleChange: 3,
@@ -101638,24 +101638,26 @@ var App = new p5_1.default(function (s) {
   };
 
   var handleasteroid = function handleasteroid() {
-    singleAsteroid.angle += singleAsteroid.angleChange; // singleAsteroid.x += singleAsteroid.speed;
-    // singleAsteroid.y += singleAsteroid.speed;
-    // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
+    if (singleAsteroid) {
+      singleAsteroid.angle += singleAsteroid.angleChange; // singleAsteroid.x += singleAsteroid.speed;
+      // singleAsteroid.y += singleAsteroid.speed;
+      // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
 
-    s.push();
-    s.translate(singleAsteroid.x, singleAsteroid.y);
-    var rdns = s.radians(singleAsteroid.angle);
-    s.rotate(rdns);
-    s.fill(102, 0, 204);
-    s.stroke(150);
-    s.strokeWeight(10);
-    s.rectMode("center");
-    s.rect(0, 0, singleAsteroid.width, singleAsteroid.width);
-    s.stroke(10);
-    s.strokeWeight(2);
-    s.fill(1, 200, 50);
-    var first = s.rect(0, 0, singleAsteroid.width / 10, singleAsteroid.width / 10);
-    s.pop();
+      s.push();
+      s.translate(singleAsteroid.x, singleAsteroid.y);
+      var rdns = s.radians(singleAsteroid.angle);
+      s.rotate(rdns);
+      s.fill(102, 0, 204);
+      s.stroke(150);
+      s.strokeWeight(10);
+      s.rectMode("center");
+      s.rect(0, 0, singleAsteroid.width, singleAsteroid.width);
+      s.stroke(10);
+      s.strokeWeight(2);
+      s.fill(1, 200, 50);
+      var first = s.rect(0, 0, singleAsteroid.width / 10, singleAsteroid.width / 10);
+      s.pop();
+    }
   }; //todo, log radians and understand whats going on
 
 
@@ -101681,8 +101683,14 @@ var App = new p5_1.default(function (s) {
       var bllt = bullets[i];
 
       if (bllt) {
-        if (bllt.x < singleAsteroid.x + singleAsteroid.width / 2 && bllt.x > singleAsteroid.x - singleAsteroid.width / 2 && bllt.y < singleAsteroid.y + singleAsteroid.width / 2 && bllt.y > singleAsteroid.y - singleAsteroid.width / 2) {
-          console.log("hit");
+        if (singleAsteroid) {
+          if (bllt.x < singleAsteroid.x + singleAsteroid.width / 2 && bllt.x > singleAsteroid.x - singleAsteroid.width / 2 && bllt.y < singleAsteroid.y + singleAsteroid.width / 2 && bllt.y > singleAsteroid.y - singleAsteroid.width / 2) {
+            singleAsteroid.width--;
+          }
+        }
+
+        if (singleAsteroid.width < 20) {
+          singleAsteroid.width = 0;
         } //is it on map
 
 
@@ -101731,7 +101739,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56683" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61520" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
