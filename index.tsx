@@ -30,7 +30,9 @@ let clock = 0;
 
 const App = new p5((s: p5) => {
   let singleAsteroid: asteroidI;
-  let bullets: bulletI[] = [];
+  let asteroids: asteroidI[] = [];
+  let howManyAsteroidsAtStart: number = 10;
+  const bullets: bulletI[] = [];
   let bullet: bulletI;
   let ship: shipI;
   s.setup = () => {
@@ -53,6 +55,23 @@ const App = new p5((s: p5) => {
       width: 100,
       hitpoints: 10,
     };
+    makeAsteroids(howManyAsteroidsAtStart);
+  };
+
+  const makeAsteroids = (howmany: number) => {
+    for (let i = 0; i < howmany; i++) {
+      let asteroid: asteroidI = {
+        angle: s.random(0, 360),
+        angleChange: s.random(1, 5),
+        hitpoints: 100,
+        speed: s.random(1, 2),
+        width: s.random(50, 100),
+        x: s.random(0, s.width),
+        y: s.random(0, s.height),
+      };
+      //cuz why not concat sometimes?
+      asteroids = asteroids.concat(asteroid);
+    }
   };
 
   const shipLogic = () => {
@@ -106,7 +125,6 @@ const App = new p5((s: p5) => {
   };
   const decreaseAngleSpeed = () => {
     if (s.keyIsDown(81)) {
-      console.log("q");
       ship.angleChange -= 0.1;
     }
     if (ship.angleChange < 0) {
@@ -185,11 +203,10 @@ const App = new p5((s: p5) => {
       // singleAsteroid.x += singleAsteroid.speed;
       // singleAsteroid.y += singleAsteroid.speed;
       // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
-      s.push();
+      // s.push();
       s.translate(singleAsteroid.x, singleAsteroid.y);
       let rdns = s.radians(singleAsteroid.angle);
       s.rotate(rdns);
-
       s.fill(102, 0, 204);
       s.stroke(150);
       s.strokeWeight(10);
@@ -198,21 +215,36 @@ const App = new p5((s: p5) => {
       s.stroke(10);
       s.strokeWeight(2);
       s.fill(1, 200, 50);
-
-      let first = s.rect(
-        0,
-        0,
-        singleAsteroid.width / 10,
-        singleAsteroid.width / 10
-      );
-
+      // s.pop();
+    }
+  };
+  const handleasteroids = (astrd: asteroidI) => {
+    if (astrd) {
+      astrd.angle += astrd.angleChange;
+      astrd.x += astrd.speed;
+      astrd.y += astrd.speed;
+      // console.log("ast x", astrd.x, "ast y", astrd.y);
+      s.push();
+      s.translate(astrd.x, astrd.y);
+      let rdns = s.radians(astrd.angle);
+      s.rotate(rdns);
+      s.fill(102, 0, 204);
+      s.stroke(150);
+      s.strokeWeight(10);
+      s.rectMode("center");
+      s.rect(0, 0, astrd.width, astrd.width);
+      s.stroke(10);
+      s.strokeWeight(2);
+      s.fill(1, 200, 50);
       s.pop();
     }
   };
   //todo, log radians and understand whats going on
-  setInterval(() => {
-    console.clear();
-  }, 1000);
+  console.log(asteroids);
+
+  // setInterval(() => {
+  //   console.clear();
+  // }, 1000);
   s.draw = () => {
     clock++;
     // logger();
@@ -224,6 +256,12 @@ const App = new p5((s: p5) => {
     s.background(100);
     if (clock % 2 === 0) {
       shoot();
+    }
+    if (clock % 50 === 0) {
+      makeAsteroids(1);
+    }
+    for (let astrd of asteroids) {
+      handleasteroids(astrd);
     }
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];

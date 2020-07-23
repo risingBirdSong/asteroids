@@ -101481,6 +101481,8 @@ var showOnce = true;
 var clock = 0;
 var App = new p5_1.default(function (s) {
   var singleAsteroid;
+  var asteroids = [];
+  var howManyAsteroidsAtStart = 10;
   var bullets = [];
   var bullet;
   var ship;
@@ -101505,6 +101507,23 @@ var App = new p5_1.default(function (s) {
       width: 100,
       hitpoints: 10
     };
+    makeAsteroids(howManyAsteroidsAtStart);
+  };
+
+  var makeAsteroids = function makeAsteroids(howmany) {
+    for (var i = 0; i < howmany; i++) {
+      var asteroid = {
+        angle: s.random(0, 360),
+        angleChange: s.random(1, 5),
+        hitpoints: 100,
+        speed: s.random(1, 2),
+        width: s.random(50, 100),
+        x: s.random(0, s.width),
+        y: s.random(0, s.height)
+      }; //cuz why not concat sometimes?
+
+      asteroids = asteroids.concat(asteroid);
+    }
   };
 
   var shipLogic = function shipLogic() {
@@ -101561,7 +101580,6 @@ var App = new p5_1.default(function (s) {
 
   var decreaseAngleSpeed = function decreaseAngleSpeed() {
     if (s.keyIsDown(81)) {
-      console.log("q");
       ship.angleChange -= 0.1;
     }
 
@@ -101642,8 +101660,8 @@ var App = new p5_1.default(function (s) {
       singleAsteroid.angle += singleAsteroid.angleChange; // singleAsteroid.x += singleAsteroid.speed;
       // singleAsteroid.y += singleAsteroid.speed;
       // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
+      // s.push();
 
-      s.push();
       s.translate(singleAsteroid.x, singleAsteroid.y);
       var rdns = s.radians(singleAsteroid.angle);
       s.rotate(rdns);
@@ -101654,16 +101672,36 @@ var App = new p5_1.default(function (s) {
       s.rect(0, 0, singleAsteroid.width, singleAsteroid.width);
       s.stroke(10);
       s.strokeWeight(2);
+      s.fill(1, 200, 50); // s.pop();
+    }
+  };
+
+  var handleasteroids = function handleasteroids(astrd) {
+    if (astrd) {
+      astrd.angle += astrd.angleChange;
+      astrd.x += astrd.speed;
+      astrd.y += astrd.speed; // console.log("ast x", astrd.x, "ast y", astrd.y);
+
+      s.push();
+      s.translate(astrd.x, astrd.y);
+      var rdns = s.radians(astrd.angle);
+      s.rotate(rdns);
+      s.fill(102, 0, 204);
+      s.stroke(150);
+      s.strokeWeight(10);
+      s.rectMode("center");
+      s.rect(0, 0, astrd.width, astrd.width);
+      s.stroke(10);
+      s.strokeWeight(2);
       s.fill(1, 200, 50);
-      var first = s.rect(0, 0, singleAsteroid.width / 10, singleAsteroid.width / 10);
       s.pop();
     }
   }; //todo, log radians and understand whats going on
 
 
-  setInterval(function () {
-    console.clear();
-  }, 1000);
+  console.log(asteroids); // setInterval(() => {
+  //   console.clear();
+  // }, 1000);
 
   s.draw = function () {
     clock++; // logger();
@@ -101677,6 +101715,15 @@ var App = new p5_1.default(function (s) {
 
     if (clock % 2 === 0) {
       shoot();
+    }
+
+    if (clock % 50 === 0) {
+      makeAsteroids(1);
+    }
+
+    for (var _i = 0, asteroids_1 = asteroids; _i < asteroids_1.length; _i++) {
+      var astrd = asteroids_1[_i];
+      handleasteroids(astrd);
     }
 
     for (var i = 0; i < bullets.length; i++) {
