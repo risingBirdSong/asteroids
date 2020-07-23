@@ -101487,7 +101487,7 @@ var App = new p5_1.default(function (s) {
 
   s.setup = function () {
     s.createCanvas(700, 700);
-    s.background(100); // s.frameRate(20);
+    s.background(100); // s.frameRate(5);
 
     ship = {
       x: s.width / 2,
@@ -101638,10 +101638,10 @@ var App = new p5_1.default(function (s) {
   };
 
   var handleasteroid = function handleasteroid() {
-    // singleAsteroid.angle += singleAsteroid.angleChange;
-    // singleAsteroid.x += singleAsteroid.speed;
+    singleAsteroid.angle += singleAsteroid.angleChange; // singleAsteroid.x += singleAsteroid.speed;
     // singleAsteroid.y += singleAsteroid.speed;
     // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
+
     s.push();
     s.translate(singleAsteroid.x, singleAsteroid.y);
     var rdns = s.radians(singleAsteroid.angle);
@@ -101649,23 +101649,12 @@ var App = new p5_1.default(function (s) {
     s.fill(102, 0, 204);
     s.stroke(150);
     s.strokeWeight(10);
-    s.rect(-singleAsteroid.width / 2, -singleAsteroid.width / 2, singleAsteroid.width, singleAsteroid.width);
-    s.stroke(10);
-    s.strokeWeight(2);
-    s.fill(200, 10, 50);
-    s.rect(-singleAsteroid.width / 2, -singleAsteroid.width / 2, singleAsteroid.width / 10, singleAsteroid.width / 10); // let translationX = Math.cos(rdns) * singleAsteroid.width;
-    // let translationY = Math.sin(rdns) * singleAsteroid.width;
-
-    s.stroke(75);
-    s.strokeWeight(5);
-    s.line(-singleAsteroid.width / 2, -singleAsteroid.width / 2, rdns * singleAsteroid.width, -rdns * singleAsteroid.width);
-    s.line(-singleAsteroid.width / 2, -singleAsteroid.width / 2, -rdns * singleAsteroid.width, rdns * singleAsteroid.width);
-    console.log("rdns", rdns);
-    s.translate(100, 0);
+    s.rectMode("center");
+    s.rect(0, 0, singleAsteroid.width, singleAsteroid.width);
     s.stroke(10);
     s.strokeWeight(2);
     s.fill(1, 200, 50);
-    s.rect(-singleAsteroid.width / 2, -singleAsteroid.width / 2, singleAsteroid.width / 10, singleAsteroid.width / 10);
+    var first = s.rect(0, 0, singleAsteroid.width / 10, singleAsteroid.width / 10);
     s.pop();
   }; //todo, log radians and understand whats going on
 
@@ -101692,6 +101681,11 @@ var App = new p5_1.default(function (s) {
       var bllt = bullets[i];
 
       if (bllt) {
+        if (bllt.x < singleAsteroid.x + singleAsteroid.width / 2 && bllt.x > singleAsteroid.x - singleAsteroid.width / 2 && bllt.y < singleAsteroid.y + singleAsteroid.width / 2 && bllt.y > singleAsteroid.y - singleAsteroid.width / 2) {
+          console.log("hit");
+        } //is it on map
+
+
         if (bllt.x > 0 && bllt.x < s.width && bllt.y > 0 && bllt.y < s.height) {
           s.fill(204, 101, 192, 127);
           s.stroke(127, 63, 120);
@@ -101737,7 +101731,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56913" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56683" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
