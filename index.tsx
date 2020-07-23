@@ -41,7 +41,7 @@ function getRndBias(min: number, max: number, bias: number, influence: number) {
 const App = new p5((s: p5) => {
   let singleAsteroid: asteroidI;
   let asteroids: asteroidI[] = [];
-  let howManyAsteroidsAtStart: number = 1;
+  let howManyAsteroidsAtStart: number = 20;
   const bullets: bulletI[] = [];
   let bullet: bulletI;
   let ship: shipI;
@@ -74,11 +74,11 @@ const App = new p5((s: p5) => {
     for (let i = 0; i < howmany; i++) {
       let asteroid: asteroidI = {
         angle: s.random(0, 360),
-        angleChange: s.random(1, 5),
+        angleChange: s.random(-5, 5),
         hitpoints: 100,
-        speed: s.random(2, 4),
+        speed: s.random(3, 5),
         width: s.random(50, 100),
-        trajectory: 180,
+        trajectory: getRndBias(10, 80, 45, 0.2),
         x: 0,
         y: 0,
       };
@@ -251,9 +251,12 @@ const App = new p5((s: p5) => {
       // console.log("ast x", astrd.x, "ast y", astrd.y);
       s.push();
       s.translate(astrd.x, astrd.y);
-      let rdns = s.radians(astrd.angle);
+      let rdnsSpin = s.radians(astrd.angle);
+      let rdnsTrajectory = s.radians(astrd.trajectory);
+      astrd.x += Math.cos(rdnsTrajectory) * astrd.speed;
+      astrd.y += Math.sin(rdnsTrajectory) * astrd.speed;
       astrd.angle += astrd.angleChange;
-      s.rotate(rdns);
+      s.rotate(rdnsSpin);
       s.fill(102, 0, 204);
       s.stroke(150);
       s.strokeWeight(10);
