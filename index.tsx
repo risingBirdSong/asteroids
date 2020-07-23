@@ -28,10 +28,18 @@ let showOnce = true;
 
 let clock = 0;
 
+//great algorithm on how to bias random numbers :)
+// https://stackoverflow.com/questions/29325069/how-to-generate-random-numbers-biased-towards-one-value-in-a-range
+function getRndBias(min: number, max: number, bias: number, influence: number) {
+  var rnd = Math.random() * (max - min) + min, // random in range
+    mix = Math.random() * influence; // random mixer
+  return rnd * (1 - mix) + bias * mix; // mix full range and bias
+}
+
 const App = new p5((s: p5) => {
   let singleAsteroid: asteroidI;
   let asteroids: asteroidI[] = [];
-  let howManyAsteroidsAtStart: number = 10;
+  let howManyAsteroidsAtStart: number = 30;
   const bullets: bulletI[] = [];
   let bullet: bulletI;
   let ship: shipI;
@@ -42,8 +50,8 @@ const App = new p5((s: p5) => {
     ship = {
       x: s.width / 2,
       y: s.height / 2,
-      angle: -180,
-      speed: 3,
+      angle: -90,
+      speed: 4,
       angleChange: 3,
     };
     singleAsteroid = {
@@ -64,11 +72,22 @@ const App = new p5((s: p5) => {
         angle: s.random(0, 360),
         angleChange: s.random(1, 5),
         hitpoints: 100,
-        speed: s.random(1, 2),
+        speed: s.random(2, 4),
         width: s.random(50, 100),
-        x: s.random(0, s.width),
-        y: s.random(0, s.height),
+        x: 0,
+        y: 0,
       };
+      let rnd = s.random(0, 100);
+      if (rnd <= 50) {
+        // (asteroid.x = s.random(0, s.width)),
+        asteroid.x = getRndBias(0, s.width, 0, 1);
+        asteroid.y = s.random(-100, -300);
+      } else if (rnd > 50) {
+        asteroid.x = s.random(-100, -300);
+        asteroid.y = getRndBias(0, s.height, 0, 1);
+      }
+      // x: s.random(0, s.width),
+      // y: s.random(-100, -300),
       //cuz why not concat sometimes?
       asteroids = asteroids.concat(asteroid);
     }
@@ -218,8 +237,11 @@ const App = new p5((s: p5) => {
       // s.pop();
     }
   };
-  const handleasteroids = (astrd: asteroidI) => {
+  const handleasteroids = (astrd: asteroidI, idx: number) => {
     if (astrd) {
+      if (astrd.x > s.width * 1.3 || astrd.y > s.height * 1.3) {
+        asteroids.splice(idx, 1);
+      }
       astrd.angle += astrd.angleChange;
       astrd.x += astrd.speed;
       astrd.y += astrd.speed;
@@ -248,6 +270,9 @@ const App = new p5((s: p5) => {
   s.draw = () => {
     clock++;
     // logger();
+    setTimeout(() => {
+      console.log("asteroids", asteroids);
+    }, 200);
     handleDirections();
     increaseSpeed();
     decreaseSpeed();
@@ -257,15 +282,26 @@ const App = new p5((s: p5) => {
     if (clock % 2 === 0) {
       shoot();
     }
-    if (clock % 50 === 0) {
+    if (clock % 5 === 0) {
       makeAsteroids(1);
     }
-    for (let astrd of asteroids) {
-      handleasteroids(astrd);
+    for (let i = 0; i < asteroids.length; i++) {
+      let astrd = asteroids[i];
+      handleasteroids(astrd, i);
     }
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];
       if (bllt) {
+        for (let astr of asteroids) {
+          if (
+            bllt.x < astr.x + astr.width / 2 &&
+            bllt.x > astr.x - astr.width / 2 &&
+            bllt.y < astr.y + astr.width / 2 &&
+            bllt.y > astr.y - astr.width / 2
+          ) {
+            astr.width -= 5;
+          }
+        }
         if (singleAsteroid) {
           if (
             bllt.x < singleAsteroid.x + singleAsteroid.width / 2 &&
