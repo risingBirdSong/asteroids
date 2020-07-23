@@ -66,8 +66,8 @@ const App = new p5((s: p5) => {
         hitpoints: 100,
         speed: s.random(1, 2),
         width: s.random(50, 100),
-        x: s.random(0, s.width),
-        y: s.random(0, s.height),
+        x: s.random(-s.width, -s.width),
+        y: s.random(-s.height, s.height),
       };
       //cuz why not concat sometimes?
       asteroids = asteroids.concat(asteroid);
@@ -218,8 +218,12 @@ const App = new p5((s: p5) => {
       // s.pop();
     }
   };
-  const handleasteroids = (astrd: asteroidI) => {
+  const handleasteroids = (astrd: asteroidI, idx : number) => {
     if (astrd) {
+      if (astrd.x > s.width * 1. 3 || astrd.y > s.height * 1.3 ){
+        //RESUME
+        // asteroids.splice(i, 1);
+      }
       astrd.angle += astrd.angleChange;
       astrd.x += astrd.speed;
       astrd.y += astrd.speed;
@@ -260,12 +264,23 @@ const App = new p5((s: p5) => {
     if (clock % 50 === 0) {
       makeAsteroids(1);
     }
-    for (let astrd of asteroids) {
-      handleasteroids(astrd);
+    for (let i = 0; i < asteroids.length; i ++) {
+      let astrd = asteroids[i];
+      handleasteroids(astrd, i);
     }
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];
       if (bllt) {
+        for (let astr of asteroids) {
+          if (
+            bllt.x < astr.x + astr.width / 2 &&
+            bllt.x > astr.x - astr.width / 2 &&
+            bllt.y < astr.y + astr.width / 2 &&
+            bllt.y > astr.y - astr.width / 2
+          ) {
+            astr.width -= 5;
+          }
+        }
         if (singleAsteroid) {
           if (
             bllt.x < singleAsteroid.x + singleAsteroid.width / 2 &&
