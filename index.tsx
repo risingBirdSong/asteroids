@@ -6,6 +6,7 @@ interface shipI {
   angle: number;
   speed: number;
   angleChange: number;
+  hitpoints: number;
 }
 
 interface bulletI {
@@ -53,6 +54,7 @@ const App = new p5((s: p5) => {
       angle: -90,
       speed: 4,
       angleChange: 3,
+      hitpoints: 100,
     };
     singleAsteroid = {
       x: s.width / 4,
@@ -262,7 +264,6 @@ const App = new p5((s: p5) => {
     }
   };
   //todo, log radians and understand whats going on
-  console.log(asteroids);
 
   // setInterval(() => {
   //   console.clear();
@@ -270,9 +271,7 @@ const App = new p5((s: p5) => {
   s.draw = () => {
     clock++;
     // logger();
-    setTimeout(() => {
-      console.log("asteroids", asteroids);
-    }, 200);
+    // setTimeout(() => {}, 200);
     handleDirections();
     increaseSpeed();
     decreaseSpeed();
@@ -285,9 +284,23 @@ const App = new p5((s: p5) => {
     if (clock % 5 === 0) {
       makeAsteroids(1);
     }
+    if (ship.hitpoints < 0) {
+      console.log("dead");
+    }
     for (let i = 0; i < asteroids.length; i++) {
       let astrd = asteroids[i];
       handleasteroids(astrd, i);
+    }
+    for (let astr of asteroids) {
+      if (
+        ship.x < astr.x + astr.width / 2 &&
+        ship.x > astr.x - astr.width / 2 &&
+        ship.y < astr.y + astr.width / 2 &&
+        ship.y > astr.y - astr.width / 2
+      ) {
+        ship.hitpoints--;
+        console.log(" ship hit");
+      }
     }
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];
