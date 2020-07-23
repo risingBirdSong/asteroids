@@ -7,6 +7,7 @@ interface shipI {
   speed: number;
   angleChange: number;
   hitpoints: number;
+  thrust: number;
 }
 
 interface bulletI {
@@ -56,6 +57,7 @@ const App = new p5((s: p5) => {
       speed: 4,
       angleChange: 3,
       hitpoints: 100,
+      thrust: 0,
     };
     singleAsteroid = {
       x: s.width / 4,
@@ -184,11 +186,22 @@ const App = new p5((s: p5) => {
       ship.angle += ship.angleChange * 2;
     }
   };
+
+  const handleThrust = () => {
+    let radians = (Math.PI * ship.angle) / 180;
+    ship.x += Math.cos(radians) * ship.speed * ship.thrust;
+    ship.y += Math.sin(radians) * ship.speed * ship.thrust;
+  };
+
   const handleUp = () => {
     if (s.keyIsDown(s.UP_ARROW)) {
-      let radians = (Math.PI * ship.angle) / 180;
-      ship.x += Math.cos(radians) * ship.speed;
-      ship.y += Math.sin(radians) * ship.speed;
+      ship.thrust += 0.05;
+    }
+  };
+
+  const handleDown = () => {
+    if (s.keyIsDown(s.DOWN_ARROW)) {
+      ship.thrust -= 0.05;
     }
   };
 
@@ -202,13 +215,6 @@ const App = new p5((s: p5) => {
         radians: bulletRadians,
       };
       bullets.push(bllt);
-    }
-  };
-
-  const handleDown = () => {
-    if (s.keyIsPressed && s.keyCode === s.DOWN_ARROW) {
-      ship.x -= Math.cos(ship.angle) * 5;
-      ship.y -= Math.sin(ship.angle) * 5;
     }
   };
 
@@ -279,13 +285,15 @@ const App = new p5((s: p5) => {
     clock++;
     // logger();
     // setTimeout(() => {}, 200);
+    handleThrust();
+    handleDown();
     handleDirections();
     increaseSpeed();
     decreaseSpeed();
     increaseAngleSpeed();
     decreaseAngleSpeed();
     s.background(100);
-    if (clock % 2 === 0) {
+    if (clock % 3 === 0) {
       shoot();
     }
     if (clock % 5 === 0) {
