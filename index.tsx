@@ -80,11 +80,11 @@ const App = new p5((s: p5) => {
       let rnd = s.random(0, 100);
       if (rnd <= 50) {
         // (asteroid.x = s.random(0, s.width)),
-        asteroid.x = getRndBias(0, s.width, 0, 1);
+        asteroid.x = getRndBias(-200, s.width, -100, 1);
         asteroid.y = s.random(-100, -300);
       } else if (rnd > 50) {
         asteroid.x = s.random(-100, -300);
-        asteroid.y = getRndBias(0, s.height, 0, 1);
+        asteroid.y = getRndBias(-200, s.height, -100, 1);
       }
       // x: s.random(0, s.width),
       // y: s.random(-100, -300),
