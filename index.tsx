@@ -14,28 +14,68 @@ interface bulletI {
   speed: number;
   radians: number;
 }
+
+interface asteroidI {
+  x: number;
+  y: number;
+  width: number;
+  speed: number;
+  angle: number;
+  angleChange: number;
+  hitpoints: number;
+}
 let showOnce = true;
 
 let clock = 0;
 
 const App = new p5((s: p5) => {
-  let bullets: bulletI[] = [];
+  let singleAsteroid: asteroidI;
+  let asteroids: asteroidI[] = [];
+  let howManyAsteroidsAtStart: number = 10;
+  const bullets: bulletI[] = [];
   let bullet: bulletI;
   let ship: shipI;
   s.setup = () => {
     s.createCanvas(700, 700);
     s.background(100);
-    // s.frameRate(20);
+    // s.frameRate(5);
     ship = {
       x: s.width / 2,
       y: s.height / 2,
-      angle: 0,
+      angle: -180,
       speed: 3,
-      angleChange: 5,
+      angleChange: 3,
     };
+    singleAsteroid = {
+      x: s.width / 4,
+      y: s.height / 4,
+      angle: 33,
+      speed: 1,
+      angleChange: 3,
+      width: 100,
+      hitpoints: 10,
+    };
+    makeAsteroids(howManyAsteroidsAtStart);
+  };
+
+  const makeAsteroids = (howmany: number) => {
+    for (let i = 0; i < howmany; i++) {
+      let asteroid: asteroidI = {
+        angle: s.random(0, 360),
+        angleChange: s.random(1, 5),
+        hitpoints: 100,
+        speed: s.random(1, 2),
+        width: s.random(50, 100),
+        x: s.random(0, s.width),
+        y: s.random(0, s.height),
+      };
+      //cuz why not concat sometimes?
+      asteroids = asteroids.concat(asteroid);
+    }
   };
 
   const shipLogic = () => {
+    s.push();
     s.translate(ship.x, ship.y);
     s.rotate(s.radians(ship.angle));
     s.stroke(50);
@@ -47,6 +87,7 @@ const App = new p5((s: p5) => {
     s.line(0, 0, 40, 0);
     s.stroke(200, 1, 100);
     s.ellipse(0, 0, 4, 4);
+    s.pop();
   };
 
   const logger = () => {
@@ -54,8 +95,6 @@ const App = new p5((s: p5) => {
       showOnce = false;
       console.clear();
       let radians = (Math.PI * ship.angle) / 180;
-      console.log("bllts length", bullets.length);
-
       // console.log("ship angle", ship.angle);
       // console.log("up radians", radians);
       // console.log("cos rads", Math.cos(radians) * 10);
@@ -86,7 +125,6 @@ const App = new p5((s: p5) => {
   };
   const decreaseAngleSpeed = () => {
     if (s.keyIsDown(81)) {
-      console.log("q");
       ship.angleChange -= 0.1;
     }
     if (ship.angleChange < 0) {
@@ -158,22 +196,91 @@ const App = new p5((s: p5) => {
     handleUp();
     // handleDown();
   };
+
+  const handleasteroid = () => {
+    if (singleAsteroid) {
+      singleAsteroid.angle += singleAsteroid.angleChange;
+      // singleAsteroid.x += singleAsteroid.speed;
+      // singleAsteroid.y += singleAsteroid.speed;
+      // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
+      // s.push();
+      s.translate(singleAsteroid.x, singleAsteroid.y);
+      let rdns = s.radians(singleAsteroid.angle);
+      s.rotate(rdns);
+      s.fill(102, 0, 204);
+      s.stroke(150);
+      s.strokeWeight(10);
+      s.rectMode("center");
+      s.rect(0, 0, singleAsteroid.width, singleAsteroid.width);
+      s.stroke(10);
+      s.strokeWeight(2);
+      s.fill(1, 200, 50);
+      // s.pop();
+    }
+  };
+  const handleasteroids = (astrd: asteroidI) => {
+    if (astrd) {
+      astrd.angle += astrd.angleChange;
+      astrd.x += astrd.speed;
+      astrd.y += astrd.speed;
+      // console.log("ast x", astrd.x, "ast y", astrd.y);
+      s.push();
+      s.translate(astrd.x, astrd.y);
+      let rdns = s.radians(astrd.angle);
+      s.rotate(rdns);
+      s.fill(102, 0, 204);
+      s.stroke(150);
+      s.strokeWeight(10);
+      s.rectMode("center");
+      s.rect(0, 0, astrd.width, astrd.width);
+      s.stroke(10);
+      s.strokeWeight(2);
+      s.fill(1, 200, 50);
+      s.pop();
+    }
+  };
   //todo, log radians and understand whats going on
+  console.log(asteroids);
+
+  // setInterval(() => {
+  //   console.clear();
+  // }, 1000);
   s.draw = () => {
     clock++;
-    logger();
+    // logger();
     handleDirections();
     increaseSpeed();
     decreaseSpeed();
     increaseAngleSpeed();
     decreaseAngleSpeed();
+    s.background(100);
     if (clock % 2 === 0) {
       shoot();
     }
-    s.background(100);
+    if (clock % 50 === 0) {
+      makeAsteroids(1);
+    }
+    for (let astrd of asteroids) {
+      handleasteroids(astrd);
+    }
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];
       if (bllt) {
+        if (singleAsteroid) {
+          if (
+            bllt.x < singleAsteroid.x + singleAsteroid.width / 2 &&
+            bllt.x > singleAsteroid.x - singleAsteroid.width / 2 &&
+            bllt.y < singleAsteroid.y + singleAsteroid.width / 2 &&
+            bllt.y > singleAsteroid.y - singleAsteroid.width / 2
+          ) {
+            singleAsteroid.width--;
+          }
+        }
+        if (singleAsteroid.width < 20) {
+          singleAsteroid.width = 0;
+        }
+
+        //is it on map
         if (bllt.x > 0 && bllt.x < s.width && bllt.y > 0 && bllt.y < s.height) {
           s.fill(204, 101, 192, 127);
           s.stroke(127, 63, 120);
@@ -186,6 +293,7 @@ const App = new p5((s: p5) => {
       }
     }
     shipLogic();
+    handleasteroid();
   };
 });
 
