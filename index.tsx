@@ -23,6 +23,7 @@ interface asteroidI {
   speed: number;
   angle: number;
   angleChange: number;
+  trajectory: number;
   hitpoints: number;
 }
 let showOnce = true;
@@ -40,7 +41,7 @@ function getRndBias(min: number, max: number, bias: number, influence: number) {
 const App = new p5((s: p5) => {
   let singleAsteroid: asteroidI;
   let asteroids: asteroidI[] = [];
-  let howManyAsteroidsAtStart: number = 30;
+  let howManyAsteroidsAtStart: number = 1;
   const bullets: bulletI[] = [];
   let bullet: bulletI;
   let ship: shipI;
@@ -60,10 +61,11 @@ const App = new p5((s: p5) => {
       x: s.width / 4,
       y: s.height / 4,
       angle: 33,
-      speed: 1,
+      speed: 2,
       angleChange: 3,
       width: 100,
       hitpoints: 10,
+      trajectory: getRndBias(10, 80, 45, 0.8),
     };
     makeAsteroids(howManyAsteroidsAtStart);
   };
@@ -76,6 +78,7 @@ const App = new p5((s: p5) => {
         hitpoints: 100,
         speed: s.random(2, 4),
         width: s.random(50, 100),
+        trajectory: 180,
         x: 0,
         y: 0,
       };
@@ -221,13 +224,14 @@ const App = new p5((s: p5) => {
   const handleasteroid = () => {
     if (singleAsteroid) {
       singleAsteroid.angle += singleAsteroid.angleChange;
-      // singleAsteroid.x += singleAsteroid.speed;
-      // singleAsteroid.y += singleAsteroid.speed;
       // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
       // s.push();
       s.translate(singleAsteroid.x, singleAsteroid.y);
-      let rdns = s.radians(singleAsteroid.angle);
-      s.rotate(rdns);
+      let rdnsSpin = s.radians(singleAsteroid.angle);
+      let rdnsTrajectory = s.radians(singleAsteroid.trajectory);
+      singleAsteroid.x += Math.cos(rdnsTrajectory) * singleAsteroid.speed;
+      singleAsteroid.y += Math.sin(rdnsTrajectory) * singleAsteroid.speed;
+      s.rotate(rdnsSpin);
       s.fill(102, 0, 204);
       s.stroke(150);
       s.strokeWeight(10);
@@ -244,13 +248,11 @@ const App = new p5((s: p5) => {
       if (astrd.x > s.width * 1.3 || astrd.y > s.height * 1.3) {
         asteroids.splice(idx, 1);
       }
-      astrd.angle += astrd.angleChange;
-      astrd.x += astrd.speed;
-      astrd.y += astrd.speed;
       // console.log("ast x", astrd.x, "ast y", astrd.y);
       s.push();
       s.translate(astrd.x, astrd.y);
       let rdns = s.radians(astrd.angle);
+      astrd.angle += astrd.angleChange;
       s.rotate(rdns);
       s.fill(102, 0, 204);
       s.stroke(150);
@@ -261,14 +263,16 @@ const App = new p5((s: p5) => {
       s.strokeWeight(2);
       s.fill(1, 200, 50);
       s.pop();
+      // s.translate(astrd.x, astrd.y);
     }
   };
   //todo, log radians and understand whats going on
 
-  // setInterval(() => {
-  //   console.clear();
-  // }, 1000);
+  setInterval(() => {
+    console.clear();
+  }, 1000);
   s.draw = () => {
+    console.log(asteroids[0].x, asteroids[0].y);
     clock++;
     // logger();
     // setTimeout(() => {}, 200);
