@@ -31,6 +31,10 @@ let showOnce = true;
 
 let clock = 0;
 
+function range(start, end) {
+  return Array.from({ length: end - start + 1 }, (_, i) => i);
+}
+
 //great algorithm on how to bias random numbers :)
 // https://stackoverflow.com/questions/29325069/how-to-generate-random-numbers-biased-towards-one-value-in-a-range
 function getRndBias(min: number, max: number, bias: number, influence: number) {
@@ -42,13 +46,17 @@ function getRndBias(min: number, max: number, bias: number, influence: number) {
 const App = new p5((s: p5) => {
   let singleAsteroid: asteroidI;
   let asteroids: asteroidI[] = [];
-  let howManyAsteroidsAtStart: number = 20;
+  let howManyAsteroidsAtStart: number = 10;
   const bullets: bulletI[] = [];
   let bullet: bulletI;
   let ship: shipI;
+  let death: p5.Element;
   s.setup = () => {
     s.createCanvas(700, 700);
     s.background(100);
+    death = s.createP("ship broke from asteroid hits");
+    death.addClass("death");
+    death.hide();
     // s.frameRate(5);
     ship = {
       x: s.width / 2,
@@ -56,7 +64,7 @@ const App = new p5((s: p5) => {
       angle: -90,
       speed: 4,
       angleChange: 3,
-      hitpoints: 100,
+      hitpoints: 3,
       thrust: 0,
     };
     singleAsteroid = {
@@ -66,7 +74,7 @@ const App = new p5((s: p5) => {
       speed: 2,
       angleChange: 3,
       width: 100,
-      hitpoints: 10,
+      hitpoints: 3,
       trajectory: getRndBias(10, 80, 45, 0.8),
     };
     makeAsteroids(howManyAsteroidsAtStart);
@@ -78,9 +86,9 @@ const App = new p5((s: p5) => {
         angle: s.random(0, 360),
         angleChange: s.random(-5, 5),
         hitpoints: 100,
-        speed: s.random(3, 5),
-        width: s.random(50, 100),
-        trajectory: getRndBias(10, 80, 45, 0.2),
+        speed: s.random(2, 6),
+        width: getRndBias(50, 500, 100, 0.5),
+        trajectory: getRndBias(10, 80, 45, 0.9),
         x: 0,
         y: 0,
       };
@@ -195,23 +203,30 @@ const App = new p5((s: p5) => {
 
   const handleUp = () => {
     if (s.keyIsDown(s.UP_ARROW)) {
-      ship.thrust += 0.05;
+      if (ship.thrust < 1.6) {
+        ship.thrust += 0.05;
+      }
     }
   };
 
   const handleDown = () => {
     if (s.keyIsDown(s.DOWN_ARROW)) {
-      ship.thrust -= 0.05;
+      if (ship.thrust > -1) {
+        ship.thrust -= 0.05;
+      }
     }
   };
 
-  const shoot = () => {
+  const shoot = (shotgun?: boolean) => {
     if (s.keyIsDown(32)) {
       let bulletRadians = (Math.PI * ship.angle) / 180;
+      if (shotgun) {
+        bulletRadians += s.random(-1, 1);
+      }
       let bllt = {
         x: ship.x,
         y: ship.y,
-        speed: 8,
+        speed: s.random(7, 12),
         radians: bulletRadians,
       };
       bullets.push(bllt);
@@ -227,11 +242,11 @@ const App = new p5((s: p5) => {
     // handleDown();
   };
 
-  const handleasteroid = () => {
+  const handleAsteroid = () => {
     if (singleAsteroid) {
       singleAsteroid.angle += singleAsteroid.angleChange;
       // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
-      // s.push();
+      s.push();
       s.translate(singleAsteroid.x, singleAsteroid.y);
       let rdnsSpin = s.radians(singleAsteroid.angle);
       let rdnsTrajectory = s.radians(singleAsteroid.trajectory);
@@ -246,10 +261,10 @@ const App = new p5((s: p5) => {
       s.stroke(10);
       s.strokeWeight(2);
       s.fill(1, 200, 50);
-      // s.pop();
+      s.pop();
     }
   };
-  const handleasteroids = (astrd: asteroidI, idx: number) => {
+  const handleAsteroids = (astrd: asteroidI, idx: number) => {
     if (astrd) {
       if (astrd.x > s.width * 1.3 || astrd.y > s.height * 1.3) {
         asteroids.splice(idx, 1);
@@ -281,7 +296,7 @@ const App = new p5((s: p5) => {
     console.clear();
   }, 1000);
   s.draw = () => {
-    console.log(asteroids[0].x, asteroids[0].y);
+    // console.log(asteroids[0].x, asteroids[0].y);
     clock++;
     // logger();
     // setTimeout(() => {}, 200);
@@ -293,18 +308,38 @@ const App = new p5((s: p5) => {
     increaseAngleSpeed();
     decreaseAngleSpeed();
     s.background(100);
-    if (clock % 3 === 0) {
+    //fire rate
+
+    if (clock % 2 === 0) {
       shoot();
     }
-    if (clock % 5 === 0) {
+    if (clock % 30 === 0) {
+      shoot(true);
+    }
+
+    if (clock % 50 === 0) {
+      for (let i of range(1, 5)) {
+        shoot();
+      }
+    }
+    if (clock % 100 === 0) {
+      for (let i of range(1, 10)) {
+        shoot(true);
+      }
+    }
+    //growth more asteroids
+    if (clock % 9 === 0) {
       makeAsteroids(1);
     }
+    //die broke
     if (ship.hitpoints < 0) {
-      console.log("dead");
+      death.show();
+      ship.x = s.width * 10;
+      ship.y = s.height * 10;
     }
     for (let i = 0; i < asteroids.length; i++) {
       let astrd = asteroids[i];
-      handleasteroids(astrd, i);
+      handleAsteroids(astrd, i);
     }
     for (let astr of asteroids) {
       if (
@@ -313,21 +348,28 @@ const App = new p5((s: p5) => {
         ship.y < astr.y + astr.width / 2 &&
         ship.y > astr.y - astr.width / 2
       ) {
-        ship.hitpoints--;
+        ship.hitpoints -= 1;
         console.log(" ship hit");
       }
     }
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];
       if (bllt) {
-        for (let astr of asteroids) {
+        for (let j = 0; j < asteroids.length; j++) {
+          let astr = asteroids[j];
+          //erase die kill
+          if (astr.width < 20) {
+            asteroids.splice(j, 1);
+          }
+          //hit contact damage
           if (
             bllt.x < astr.x + astr.width / 2 &&
             bllt.x > astr.x - astr.width / 2 &&
             bllt.y < astr.y + astr.width / 2 &&
             bllt.y > astr.y - astr.width / 2
           ) {
-            astr.width -= 5;
+            astr.width -= getRndBias(1, 50, 3, 0.9);
+            bullets.splice(i, 1);
           }
         }
         if (singleAsteroid) {
@@ -345,7 +387,12 @@ const App = new p5((s: p5) => {
         }
 
         //is it on map
-        if (bllt.x > 0 && bllt.x < s.width && bllt.y > 0 && bllt.y < s.height) {
+        if (
+          bllt.x > -400 &&
+          bllt.x < s.width + 400 &&
+          bllt.y > -400 &&
+          bllt.y < s.height + 400
+        ) {
           s.fill(204, 101, 192, 127);
           s.stroke(127, 63, 120);
           s.ellipse(bllt.x, bllt.y, 10, 10);
@@ -356,8 +403,8 @@ const App = new p5((s: p5) => {
         }
       }
     }
+    // handleAsteroid();
     shipLogic();
-    handleasteroid();
   };
 });
 
