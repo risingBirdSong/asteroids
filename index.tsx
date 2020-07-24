@@ -15,6 +15,10 @@ interface bulletI {
   y: number;
   speed: number;
   radians: number;
+  colors: {
+    red: number;
+    blue: number;
+  };
 }
 
 interface asteroidI {
@@ -26,6 +30,10 @@ interface asteroidI {
   angleChange: number;
   trajectory: number;
   hitpoints: number;
+  colors: {
+    red: number;
+    blue: number;
+  };
 }
 let showOnce = true;
 
@@ -44,6 +52,9 @@ function getRndBias(min: number, max: number, bias: number, influence: number) {
 }
 
 const App = new p5((s: p5) => {
+  let asteroidsDestroyed: number = 0;
+  let curRound: number = 0;
+  let hits: number = 0;
   let specialAttackAmount: number = 10;
   let rapidFireAmount = 50;
   let singleAsteroid: asteroidI;
@@ -82,6 +93,10 @@ const App = new p5((s: p5) => {
       width: 100,
       hitpoints: 3,
       trajectory: getRndBias(20, 70, 45, 0.5),
+      colors: {
+        red: s.random(80, 120),
+        blue: s.random(190, 230),
+      },
     };
     makeAsteroids(howManyAsteroidsAtStart);
   };
@@ -97,6 +112,10 @@ const App = new p5((s: p5) => {
         trajectory: getRndBias(10, 80, 45, 0.9),
         x: 0,
         y: 0,
+        colors: {
+          red: s.random(50, 160),
+          blue: s.random(150, 230),
+        },
       };
       if (speedster) {
         asteroid.speed = 14;
@@ -238,13 +257,17 @@ const App = new p5((s: p5) => {
         if (special === "breadth") {
           bulletRadians += getRndBias(-2, 2, 0, 1);
         } else if (special === "depth") {
-          bulletRadians += getRndBias(-0.15, 0.15, 0, 1);
+          bulletRadians += getRndBias(-0.27, 0.27, 0, 0.5);
         }
-        let bllt = {
+        let bllt: bulletI = {
           x: ship.x,
           y: ship.y,
           speed: s.random(7, 12),
           radians: bulletRadians,
+          colors: {
+            red: getRndBias(180, 250, 240, 0.9),
+            blue: getRndBias(60, 200, 120, 0.5),
+          },
         };
         bullets.push(bllt);
       }
@@ -271,6 +294,7 @@ const App = new p5((s: p5) => {
       singleAsteroid.x += Math.cos(rdnsTrajectory) * singleAsteroid.speed;
       singleAsteroid.y += Math.sin(rdnsTrajectory) * singleAsteroid.speed;
       s.rotate(rdnsSpin);
+
       s.fill(102, 0, 204);
       s.stroke(150);
       s.strokeWeight(10);
@@ -296,7 +320,7 @@ const App = new p5((s: p5) => {
       astrd.y += Math.sin(rdnsTrajectory) * astrd.speed;
       astrd.angle += astrd.angleChange;
       s.rotate(rdnsSpin);
-      s.fill(102, 0, 204);
+      s.fill(astrd.colors.red, 0, astrd.colors.blue);
       s.stroke(150);
       s.strokeWeight(10);
       s.rectMode("center");
@@ -331,9 +355,9 @@ const App = new p5((s: p5) => {
   };
 
   setInterval(() => {
-    specialAttackAmount++;
-    rapidFireAmount += 5;
-  }, 2000);
+    specialAttackAmount += 1 + curRound;
+    rapidFireAmount += 6 + curRound * 2;
+  }, 1000);
 
   // setInterval(() => {
   //   console.clear();
@@ -375,8 +399,8 @@ const App = new p5((s: p5) => {
       }
     }
     //growth more asteroids
-    if (clock % 9 === 0) {
-      makeAsteroids(1);
+    if (clock % 10 === 0) {
+      makeAsteroids(1 + curRound);
     }
     if (s.keyIsDown(86) && rapidFireAmount > 0) {
       rapidFireAmount--;
@@ -385,20 +409,24 @@ const App = new p5((s: p5) => {
       shoot(false, "depth");
     }
     if (clock % 40 === 0) {
-      makeAsteroids(2, true);
+      makeAsteroids(2 + curRound, true);
     }
     if (clock % 150 === 0) {
-      makeAsteroids(3, true);
+      makeAsteroids(3 + curRound, true);
     }
     if (clock % 300 === 0) {
-      makeAsteroids(10, true);
+      makeAsteroids(10 + curRound, true);
     }
     if (clock % 1000 === 0) {
       console.log("round");
-      makeAsteroids(22);
+      curRound++;
+      makeAsteroids(22 + curRound * 2);
     }
     //die broke
     if (ship?.hitpoints < 0) {
+      console.log("clock after death", clock);
+      console.log("total hits", hits);
+      console.log("asteroids destroyed", asteroidsDestroyed);
       deathHits.show();
       ship = null;
     }
@@ -410,6 +438,7 @@ const App = new p5((s: p5) => {
         ship.y > s.height + 300
       ) {
         console.log("drifted off map death!");
+        console.log("clock after death", clock);
         deathMap.show();
       }
     }
@@ -439,6 +468,7 @@ const App = new p5((s: p5) => {
           //erase die kill
           if (astr.width < 13) {
             asteroids.splice(j, 1);
+            asteroidsDestroyed++;
           }
           //hit contact damage
           if (
@@ -448,6 +478,7 @@ const App = new p5((s: p5) => {
             bllt.y > astr.y - astr.width / 2
           ) {
             astr.width -= getRndBias(1, 50, 2, 0.9);
+            hits++;
             bullets.splice(i, 1);
           }
         }
@@ -472,7 +503,7 @@ const App = new p5((s: p5) => {
           bllt.y > -400 &&
           bllt.y < s.height + 400
         ) {
-          s.fill(204, 101, 192, 127);
+          s.fill(bllt.colors.red, 0, bllt.colors.blue);
           s.stroke(127, 63, 120);
           s.ellipse(bllt.x, bllt.y, 10, 10);
           bllt.x += Math.cos(bllt.radians) * bllt.speed;
