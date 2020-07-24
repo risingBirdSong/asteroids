@@ -7,6 +7,7 @@ interface shipI {
   speed: number;
   angleChange: number;
   hitpoints: number;
+  thrust: number;
 }
 
 interface bulletI {
@@ -14,6 +15,10 @@ interface bulletI {
   y: number;
   speed: number;
   radians: number;
+  colors: {
+    red: number;
+    blue: number;
+  };
 }
 
 interface asteroidI {
@@ -23,11 +28,20 @@ interface asteroidI {
   speed: number;
   angle: number;
   angleChange: number;
+  trajectory: number;
   hitpoints: number;
+  colors: {
+    red: number;
+    blue: number;
+  };
 }
 let showOnce = true;
 
 let clock = 0;
+
+function range(start: number, end: number) {
+  return Array.from({ length: end - start + 1 }, (_, i) => i);
+}
 
 //great algorithm on how to bias random numbers :)
 // https://stackoverflow.com/questions/29325069/how-to-generate-random-numbers-biased-towards-one-value-in-a-range
@@ -38,55 +52,82 @@ function getRndBias(min: number, max: number, bias: number, influence: number) {
 }
 
 const App = new p5((s: p5) => {
+  let asteroidsDestroyed: number = 0;
+  let curRound: number = 0;
+  let hits: number = 0;
+  let specialAttackAmount: number = 10;
+  let rapidFireAmount = 50;
   let singleAsteroid: asteroidI;
   let asteroids: asteroidI[] = [];
   let howManyAsteroidsAtStart: number = 30;
   const bullets: bulletI[] = [];
   let bullet: bulletI;
   let ship: shipI;
+  let deathHits: p5.Element;
+  let deathMap: p5.Element;
   s.setup = () => {
     s.createCanvas(700, 700);
     s.background(100);
+    deathHits = s.createP("ship broke from asteroid hits. restart");
+    deathMap = s.createP("ship drifted too far off map! restart");
+    deathHits.addClass("death");
+    deathMap.addClass("death");
+    deathHits.hide();
+    deathMap.hide();
     // s.frameRate(5);
     ship = {
       x: s.width / 2,
       y: s.height / 2,
-      angle: -90,
-      speed: 4,
+      angle: 210,
+      speed: 5,
       angleChange: 3,
-      hitpoints: 100,
+      hitpoints: 3,
+      thrust: -0.5,
     };
     singleAsteroid = {
       x: s.width / 4,
       y: s.height / 4,
       angle: 33,
-      speed: 1,
+      speed: 2,
       angleChange: 3,
       width: 100,
-      hitpoints: 10,
+      hitpoints: 3,
+      trajectory: getRndBias(20, 70, 45, 0.5),
+      colors: {
+        red: s.random(80, 120),
+        blue: s.random(190, 230),
+      },
     };
     makeAsteroids(howManyAsteroidsAtStart);
   };
 
-  const makeAsteroids = (howmany: number) => {
+  const makeAsteroids = (howmany: number, speedster?: boolean) => {
     for (let i = 0; i < howmany; i++) {
       let asteroid: asteroidI = {
         angle: s.random(0, 360),
-        angleChange: s.random(1, 5),
+        angleChange: s.random(-5, 5),
         hitpoints: 100,
-        speed: s.random(2, 4),
-        width: s.random(50, 100),
+        speed: getRndBias(0.5, 6.5, 3, 1),
+        width: getRndBias(10, 400, 50, 1),
+        trajectory: getRndBias(10, 80, 45, 0.9),
         x: 0,
         y: 0,
+        colors: {
+          red: s.random(50, 160),
+          blue: s.random(150, 230),
+        },
       };
+      if (speedster) {
+        asteroid.speed = 14;
+      }
       let rnd = s.random(0, 100);
       if (rnd <= 50) {
         // (asteroid.x = s.random(0, s.width)),
-        asteroid.x = getRndBias(-200, s.width, -100, 1);
+        asteroid.x = getRndBias(-200, s.width, 0, 0.9);
         asteroid.y = s.random(-100, -300);
       } else if (rnd > 50) {
         asteroid.x = s.random(-100, -300);
-        asteroid.y = getRndBias(-200, s.height, -100, 1);
+        asteroid.y = getRndBias(-200, s.height, 0, 0.9);
       }
       // x: s.random(0, s.width),
       // y: s.random(-100, -300),
@@ -96,19 +137,21 @@ const App = new p5((s: p5) => {
   };
 
   const shipLogic = () => {
-    s.push();
-    s.translate(ship.x, ship.y);
-    s.rotate(s.radians(ship.angle));
-    s.stroke(50);
-    // s.rect(0, 0, 100, 30);
-    // s.fill(200);
-    // s.rect(0, 0, 10, 30);
-    s.strokeWeight(10);
-    s.strokeCap("round");
-    s.line(0, 0, 40, 0);
-    s.stroke(200, 1, 100);
-    s.ellipse(0, 0, 4, 4);
-    s.pop();
+    if (ship) {
+      s.push();
+      s.translate(ship.x, ship.y);
+      s.rotate(s.radians(ship.angle));
+      s.stroke(50);
+      // s.rect(0, 0, 100, 30);
+      // s.fill(200);
+      // s.rect(0, 0, 10, 30);
+      s.strokeWeight(10);
+      s.strokeCap("round");
+      s.line(0, 0, 40, 0);
+      s.stroke(200, 1, 100);
+      s.ellipse(0, 0, 4, 4);
+      s.pop();
+    }
   };
 
   const logger = () => {
@@ -181,31 +224,53 @@ const App = new p5((s: p5) => {
       ship.angle += ship.angleChange * 2;
     }
   };
-  const handleUp = () => {
-    if (s.keyIsDown(s.UP_ARROW)) {
-      let radians = (Math.PI * ship.angle) / 180;
-      ship.x += Math.cos(radians) * ship.speed;
-      ship.y += Math.sin(radians) * ship.speed;
-    }
+
+  const handleThrust = () => {
+    let radians = (Math.PI * ship.angle) / 180;
+    ship.x += Math.cos(radians) * ship.speed * ship.thrust;
+    ship.y += Math.sin(radians) * ship.speed * ship.thrust;
   };
 
-  const shoot = () => {
-    if (s.keyIsDown(32)) {
-      let bulletRadians = (Math.PI * ship.angle) / 180;
-      let bllt = {
-        x: ship.x,
-        y: ship.y,
-        speed: 8,
-        radians: bulletRadians,
-      };
-      bullets.push(bllt);
+  const handleUp = () => {
+    if (s.keyIsDown(s.UP_ARROW)) {
+      if (ship.thrust < 1.6) {
+        ship.thrust += 0.05;
+      }
     }
   };
 
   const handleDown = () => {
-    if (s.keyIsPressed && s.keyCode === s.DOWN_ARROW) {
-      ship.x -= Math.cos(ship.angle) * 5;
-      ship.y -= Math.sin(ship.angle) * 5;
+    if (s.keyIsDown(s.DOWN_ARROW)) {
+      if (ship.thrust > -1) {
+        ship.thrust -= 0.05;
+      }
+    }
+  };
+
+  const shoot = (shotgun?: boolean, special?: "breadth" | "depth") => {
+    if (ship) {
+      if (s.keyIsDown(32) || special) {
+        let bulletRadians = (Math.PI * ship.angle) / 180;
+        if (shotgun) {
+          bulletRadians += s.random(-1, 1);
+        }
+        if (special === "breadth") {
+          bulletRadians += getRndBias(-2, 2, 0, 1);
+        } else if (special === "depth") {
+          bulletRadians += getRndBias(-0.27, 0.27, 0, 0.5);
+        }
+        let bllt: bulletI = {
+          x: ship.x,
+          y: ship.y,
+          speed: s.random(7, 12),
+          radians: bulletRadians,
+          colors: {
+            red: getRndBias(180, 250, 240, 0.9),
+            blue: getRndBias(60, 200, 120, 0.5),
+          },
+        };
+        bullets.push(bllt);
+      }
     }
   };
 
@@ -218,16 +283,18 @@ const App = new p5((s: p5) => {
     // handleDown();
   };
 
-  const handleasteroid = () => {
+  const handleAsteroid = () => {
     if (singleAsteroid) {
       singleAsteroid.angle += singleAsteroid.angleChange;
-      // singleAsteroid.x += singleAsteroid.speed;
-      // singleAsteroid.y += singleAsteroid.speed;
       // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
-      // s.push();
+      s.push();
       s.translate(singleAsteroid.x, singleAsteroid.y);
-      let rdns = s.radians(singleAsteroid.angle);
-      s.rotate(rdns);
+      let rdnsSpin = s.radians(singleAsteroid.angle);
+      let rdnsTrajectory = s.radians(singleAsteroid.trajectory);
+      singleAsteroid.x += Math.cos(rdnsTrajectory) * singleAsteroid.speed;
+      singleAsteroid.y += Math.sin(rdnsTrajectory) * singleAsteroid.speed;
+      s.rotate(rdnsSpin);
+
       s.fill(102, 0, 204);
       s.stroke(150);
       s.strokeWeight(10);
@@ -236,23 +303,24 @@ const App = new p5((s: p5) => {
       s.stroke(10);
       s.strokeWeight(2);
       s.fill(1, 200, 50);
-      // s.pop();
+      s.pop();
     }
   };
-  const handleasteroids = (astrd: asteroidI, idx: number) => {
+  const handleAsteroids = (astrd: asteroidI, idx: number) => {
     if (astrd) {
       if (astrd.x > s.width * 1.3 || astrd.y > s.height * 1.3) {
         asteroids.splice(idx, 1);
       }
-      astrd.angle += astrd.angleChange;
-      astrd.x += astrd.speed;
-      astrd.y += astrd.speed;
       // console.log("ast x", astrd.x, "ast y", astrd.y);
       s.push();
       s.translate(astrd.x, astrd.y);
-      let rdns = s.radians(astrd.angle);
-      s.rotate(rdns);
-      s.fill(102, 0, 204);
+      let rdnsSpin = s.radians(astrd.angle);
+      let rdnsTrajectory = s.radians(astrd.trajectory);
+      astrd.x += Math.cos(rdnsTrajectory) * astrd.speed;
+      astrd.y += Math.sin(rdnsTrajectory) * astrd.speed;
+      astrd.angle += astrd.angleChange;
+      s.rotate(rdnsSpin);
+      s.fill(astrd.colors.red, 0, astrd.colors.blue);
       s.stroke(150);
       s.strokeWeight(10);
       s.rectMode("center");
@@ -261,58 +329,157 @@ const App = new p5((s: p5) => {
       s.strokeWeight(2);
       s.fill(1, 200, 50);
       s.pop();
+      // s.translate(astrd.x, astrd.y);
     }
   };
   //todo, log radians and understand whats going on
+
+  const specialAttack = () => {
+    if (s.keyIsDown(67) && specialAttackAmount > 0) {
+      specialAttackAmount--;
+      for (let i of range(0, 30)) {
+        shoot(false, "breadth");
+      }
+    }
+  };
+
+  const rapidFire = () => {
+    if (s.keyIsDown(86) && rapidFireAmount > 0) {
+      console.log("v");
+      rapidFireAmount--;
+      for (let i of range(0, 40)) {
+        console.log("rapid fire");
+        shoot(false, "depth");
+      }
+    }
+  };
+
+  setInterval(() => {
+    specialAttackAmount += 1 + curRound;
+    rapidFireAmount += 6 + curRound * 2;
+  }, 1000);
 
   // setInterval(() => {
   //   console.clear();
   // }, 1000);
   s.draw = () => {
+    // console.log(asteroids[0].x, asteroids[0].y);
     clock++;
     // logger();
     // setTimeout(() => {}, 200);
-    handleDirections();
-    increaseSpeed();
-    decreaseSpeed();
-    increaseAngleSpeed();
-    decreaseAngleSpeed();
+    if (ship) {
+      handleThrust();
+      handleDown();
+      handleDirections();
+      increaseSpeed();
+      decreaseSpeed();
+      increaseAngleSpeed();
+      decreaseAngleSpeed();
+      specialAttack();
+      // rapidFire();
+    }
     s.background(100);
+    //fire rate
+
     if (clock % 2 === 0) {
       shoot();
     }
-    if (clock % 5 === 0) {
-      makeAsteroids(1);
+    if (clock % 30 === 0) {
+      shoot(true);
     }
-    if (ship.hitpoints < 0) {
-      console.log("dead");
+
+    if (clock % 50 === 0) {
+      for (let i of range(1, 5)) {
+        shoot();
+      }
     }
+    if (clock % 100 === 0) {
+      for (let i of range(1, 10)) {
+        shoot(true);
+      }
+    }
+    //growth more asteroids
+    if (clock % 10 === 0) {
+      makeAsteroids(1 + curRound);
+    }
+    if (s.keyIsDown(86) && rapidFireAmount > 0) {
+      rapidFireAmount--;
+      shoot(false, "depth");
+      shoot(false, "depth");
+      shoot(false, "depth");
+    }
+    if (clock % 40 === 0) {
+      makeAsteroids(2 + curRound, true);
+    }
+    if (clock % 150 === 0) {
+      makeAsteroids(3 + curRound, true);
+    }
+    if (clock % 300 === 0) {
+      makeAsteroids(10 + curRound, true);
+    }
+    if (clock % 1000 === 0) {
+      console.log("round");
+      curRound++;
+      makeAsteroids(22 + curRound * 2);
+    }
+    //die broke
+    if (ship?.hitpoints < 0) {
+      console.log("clock after death", clock);
+      console.log("total hits", hits);
+      console.log("asteroids destroyed", asteroidsDestroyed);
+      deathHits.show();
+      ship = null;
+    }
+    if (ship) {
+      if (
+        ship.x < -300 ||
+        ship.x > s.width + 300 ||
+        ship.y < -300 ||
+        ship.y > s.height + 300
+      ) {
+        console.log("drifted off map death!");
+        console.log("clock after death", clock);
+        deathMap.show();
+      }
+    }
+
     for (let i = 0; i < asteroids.length; i++) {
       let astrd = asteroids[i];
-      handleasteroids(astrd, i);
+      handleAsteroids(astrd, i);
     }
     for (let astr of asteroids) {
-      if (
-        ship.x < astr.x + astr.width / 2 &&
-        ship.x > astr.x - astr.width / 2 &&
-        ship.y < astr.y + astr.width / 2 &&
-        ship.y > astr.y - astr.width / 2
-      ) {
-        ship.hitpoints--;
-        console.log(" ship hit");
+      if (ship) {
+        if (
+          ship.x < astr.x + astr.width / 2 &&
+          ship.x > astr.x - astr.width / 2 &&
+          ship.y < astr.y + astr.width / 2 &&
+          ship.y > astr.y - astr.width / 2
+        ) {
+          ship.hitpoints -= 1;
+          console.log(" ship hit");
+        }
       }
     }
     for (let i = 0; i < bullets.length; i++) {
       let bllt = bullets[i];
       if (bllt) {
-        for (let astr of asteroids) {
+        for (let j = 0; j < asteroids.length; j++) {
+          let astr = asteroids[j];
+          //erase die kill
+          if (astr.width < 13) {
+            asteroids.splice(j, 1);
+            asteroidsDestroyed++;
+          }
+          //hit contact damage
           if (
             bllt.x < astr.x + astr.width / 2 &&
             bllt.x > astr.x - astr.width / 2 &&
             bllt.y < astr.y + astr.width / 2 &&
             bllt.y > astr.y - astr.width / 2
           ) {
-            astr.width -= 5;
+            astr.width -= getRndBias(1, 50, 2, 0.9);
+            hits++;
+            bullets.splice(i, 1);
           }
         }
         if (singleAsteroid) {
@@ -330,8 +497,13 @@ const App = new p5((s: p5) => {
         }
 
         //is it on map
-        if (bllt.x > 0 && bllt.x < s.width && bllt.y > 0 && bllt.y < s.height) {
-          s.fill(204, 101, 192, 127);
+        if (
+          bllt.x > -400 &&
+          bllt.x < s.width + 400 &&
+          bllt.y > -400 &&
+          bllt.y < s.height + 400
+        ) {
+          s.fill(bllt.colors.red, 0, bllt.colors.blue);
           s.stroke(127, 63, 120);
           s.ellipse(bllt.x, bllt.y, 10, 10);
           bllt.x += Math.cos(bllt.radians) * bllt.speed;
@@ -341,8 +513,8 @@ const App = new p5((s: p5) => {
         }
       }
     }
+    // handleAsteroid();
     shipLogic();
-    handleasteroid();
   };
 });
 
