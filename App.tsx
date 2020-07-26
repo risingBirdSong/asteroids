@@ -56,6 +56,9 @@ function getRndBias(min: number, max: number, bias: number, influence: number) {
 interface GameStateI {
   health: number;
   asteroidsDestroyed: number;
+  playing: boolean;
+  showControls: boolean;
+  death: string;
 }
 
 class App extends React.Component<any, GameStateI> {
@@ -67,6 +70,9 @@ class App extends React.Component<any, GameStateI> {
     this.state = {
       asteroidsDestroyed: 0,
       health: 4,
+      playing: true,
+      showControls: false,
+      death: "",
     };
   }
 
@@ -370,6 +376,34 @@ class App extends React.Component<any, GameStateI> {
       }
     };
 
+    const resetGame = () => {
+      if (s.keyIsDown(13)) {
+        console.log("clearing");
+        asteroids = [];
+        ship = {
+          x: s.width / 2,
+          y: s.height / 2,
+          angle: 220,
+          speed: 5,
+          angleChange: 3,
+          hitpoints: this.state.health,
+          thrust: -0.5,
+        };
+        this.setState({
+          asteroidsDestroyed: 0,
+          health: 4,
+          playing: true,
+          death: "",
+        });
+        asteroidsDestroyed = 0;
+        curRound = 0;
+        hits = 0;
+        specialAttackAmount = 10;
+        rapidFireAmount = 50;
+        makeAsteroids(howManyAsteroidsAtStart);
+      }
+    };
+
     setInterval(() => {
       specialAttackAmount += 1 + curRound;
     }, 2500);
@@ -382,6 +416,7 @@ class App extends React.Component<any, GameStateI> {
     //   console.clear();
     // }, 1000);
     s.draw = () => {
+      resetGame();
       // console.log(asteroids[0].x, asteroids[0].y);
       clock++;
       // logger();
@@ -441,11 +476,8 @@ class App extends React.Component<any, GameStateI> {
       }
       //die broke
       if (this.state.health < 0) {
-        console.log("clock after death", clock);
-        console.log("total hits", hits);
-        console.log("asteroids destroyed", asteroidsDestroyed);
-        deathHits.show();
         ship = null;
+        this.setState({ death: "death due to asteroid!" });
       }
       if (ship) {
         if (
@@ -454,9 +486,7 @@ class App extends React.Component<any, GameStateI> {
           ship.y < -300 ||
           ship.y > s.height + 300
         ) {
-          console.log("drifted off map death!");
-          console.log("clock after death", clock);
-          deathMap.show();
+          this.setState({ death: "death from drifting off map!" });
         }
       }
 
@@ -543,12 +573,127 @@ class App extends React.Component<any, GameStateI> {
     this.myP5 = new p5(this.Sketch, this.myRef.current);
   }
 
+  componentWillMount() {
+    this.myP5 = null;
+  }
+
+  keyBoardRestart = (e) => {};
+
   render() {
     return (
-      //@ts-ignore
-      <div ref={this.myRef}>
-        <p>asteroids destroyed : {this.state.asteroidsDestroyed}</p>
-        <p>health : {this.state.health}</p>
+      <div
+        onKeyPress={(e) => {
+          console.log("e", e.key);
+        }}
+        className="gamecanvas"
+        //@ts-ignore
+        ref={this.myRef}
+      >
+        <div className="info">
+          <p>
+            asteroids destroyed :{" "}
+            <span style={{ color: "purple" }}>
+              {" "}
+              {this.state.asteroidsDestroyed}
+            </span>
+          </p>
+          <p>
+            health : <span style={{ color: "gold" }}> {this.state.health}</span>
+          </p>
+          <button
+            onClick={() => {
+              this.setState({ showControls: !this.state.showControls });
+            }}
+            style={{ backgroundColor: "lightblue" }}
+          >
+            controls
+          </button>
+          {this.state.death ? (
+            <h3 style={{ marginLeft: "3px", color: "red" }}>
+              {this.state.death}
+            </h3>
+          ) : (
+            ""
+          )}
+          {this.state.showControls ? (
+            <div className="controlpanel">
+              <div>
+                {/* <p>
+                  {" "}
+                  <span className="button">button</span>{" "}
+                  <span className="description"> description</span>{" "}
+                </p> */}
+                <div className="spacer">
+                  <p>
+                    {" "}
+                    <span className="buttonmain">button</span>{" "}
+                    <span className="descriptionmain"> effect</span>{" "}
+                  </p>
+                </div>
+                <p>
+                  {" "}
+                  <span className="button">enter</span>{" "}
+                  <span className="description"> restart game</span>{" "}
+                </p>
+                <p>
+                  {" "}
+                  <span className="button">w</span>{" "}
+                  <span className="description"> speed up</span>{" "}
+                </p>
+                <p>
+                  {" "}
+                  <span className="button">s</span>{" "}
+                  <span className="description"> slow down</span>{" "}
+                </p>
+                <p>
+                  {" "}
+                  <span className="button">e</span>{" "}
+                  <span className="description"> inc turn speed</span>{" "}
+                </p>
+                <p>
+                  {" "}
+                  <span className="button">q</span>{" "}
+                  <span className="description"> dec turn speed</span>{" "}
+                </p>
+                <p>
+                  {" "}
+                  <span className="button">f</span>{" "}
+                  <span className="description"> depth attack</span>{" "}
+                </p>
+                <p>
+                  {" "}
+                  <span className="button">c</span>{" "}
+                  <span className="description"> breadth attack</span>{" "}
+                </p>
+                <p>
+                  {" "}
+                  <span className="button">space</span>{" "}
+                  <span className="description"> regular attack</span>{" "}
+                </p>
+                <p>
+                  {" "}
+                  <span className="button">arrows</span>{" "}
+                  <span className="description"> steer</span>{" "}
+                </p>
+                <br />
+                {/* <div className="note">
+                  note, both special attacks recharge overtime
+                </div> */}
+                <div className="note">
+                  <React.Fragment>note, both special attacks</React.Fragment>
+                  <br />
+                  <React.Fragment>recharge overtime</React.Fragment>
+                  <hr />
+                  <React.Fragment>click the "controls" button</React.Fragment>
+                  <br />
+                  <React.Fragment> again to close this window</React.Fragment>
+                </div>
+              </div>
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
       </div>
     );
   }
