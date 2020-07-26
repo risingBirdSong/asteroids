@@ -68,13 +68,17 @@ canvas {
 }
 .button {
   padding: 2vh;
+  margin: 1px;
+  border: 2px solid purple;
   margin-left: auto;
   margin-right: auto;
   background-color: deepskyblue;
   width: 200px;
 }
 .description {
+  margin: 1px;
   padding: 2vh;
+  border: 2px solid purple;
   margin-left: auto;
   margin-right: auto;
   background-color: azure;
