@@ -59,8 +59,10 @@ interface GameStateI {
   playing: boolean;
   showControls: boolean;
   death: string;
+  difficulty: boolean;
 }
 
+let gloablDifficulty: boolean = false;
 class App extends React.Component<any, GameStateI> {
   public myRef: React.RefObject<HTMLCanvasElement>;
   public myP5: p5;
@@ -73,6 +75,7 @@ class App extends React.Component<any, GameStateI> {
       playing: true,
       showControls: false,
       death: "",
+      difficulty: gloablDifficulty,
     };
   }
 
@@ -84,7 +87,13 @@ class App extends React.Component<any, GameStateI> {
     let rapidFireAmount = 50;
     let singleAsteroid: asteroidI;
     let asteroids: asteroidI[] = [];
-    let howManyAsteroidsAtStart: number = 30;
+    let difficulty = this.state.difficulty;
+    let howManyAsteroidsAtStart: number;
+    if (!this.state.difficulty) {
+      howManyAsteroidsAtStart = 5;
+    } else {
+      howManyAsteroidsAtStart = 30;
+    }
     const bullets: bulletI[] = [];
     let bullet: bulletI;
     let ship: shipI;
@@ -418,6 +427,7 @@ class App extends React.Component<any, GameStateI> {
     s.draw = () => {
       resetGame();
       // console.log(asteroids[0].x, asteroids[0].y);
+
       clock++;
       // logger();
       // setTimeout(() => {}, 200);
@@ -450,30 +460,38 @@ class App extends React.Component<any, GameStateI> {
           shoot(true);
         }
       }
-      //growth more asteroids
-      if (clock % 10 === 0) {
-        makeAsteroids(1 + curRound);
-      }
+
       if (s.keyIsDown(70) && rapidFireAmount > 0) {
         rapidFireAmount--;
         shoot(false, "depth");
         shoot(false, "depth");
         shoot(false, "depth");
       }
-      if (clock % 40 === 0) {
-        makeAsteroids(2 + curRound, true);
+      //growth more asteroids
+      if (!this.state.difficulty) {
+        if (clock % 15 === 0) {
+          makeAsteroids(1 + curRound);
+        }
+      } else if (this.state.difficulty) {
+        if (clock % 10 === 0) {
+          makeAsteroids(1 + curRound);
+        }
+        if (clock % 40 === 0) {
+          makeAsteroids(2 + curRound, true);
+        }
+        if (clock % 150 === 0) {
+          makeAsteroids(3 + curRound, true);
+        }
+        if (clock % 300 === 0) {
+          makeAsteroids(10 + curRound, true);
+        }
+        if (clock % 1000 === 0) {
+          console.log("round");
+          curRound++;
+          makeAsteroids(22 + curRound * 2);
+        }
       }
-      if (clock % 150 === 0) {
-        makeAsteroids(3 + curRound, true);
-      }
-      if (clock % 300 === 0) {
-        makeAsteroids(10 + curRound, true);
-      }
-      if (clock % 1000 === 0) {
-        console.log("round");
-        curRound++;
-        makeAsteroids(22 + curRound * 2);
-      }
+
       //die broke
       if (this.state.health < 0) {
         ship = null;
@@ -580,6 +598,7 @@ class App extends React.Component<any, GameStateI> {
   keyBoardRestart = (e) => {};
 
   render() {
+    let difficulty = this.state.difficulty;
     return (
       <div
         onKeyPress={(e) => {
@@ -607,6 +626,15 @@ class App extends React.Component<any, GameStateI> {
             style={{ backgroundColor: "lightblue" }}
           >
             controls
+          </button>
+          <button
+            onClick={() => {
+              this.setState({ difficulty: !difficulty });
+              gloablDifficulty = !gloablDifficulty;
+              console.log("dfclty", gloablDifficulty);
+            }}
+          >
+            difficulty : {difficulty ? "crazy" : "normal"}
           </button>
           {this.state.death ? (
             <h3 style={{ marginLeft: "3px", color: "red" }}>

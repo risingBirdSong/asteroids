@@ -60793,6 +60793,8 @@ function getRndBias(min, max, bias, influence) {
   return rnd * (1 - mix) + bias * mix; // mix full range and bias
 }
 
+var gloablDifficulty = false;
+
 var App =
 /** @class */
 function (_super) {
@@ -60809,7 +60811,15 @@ function (_super) {
       var rapidFireAmount = 50;
       var singleAsteroid;
       var asteroids = [];
-      var howManyAsteroidsAtStart = 30;
+      var difficulty = _this.state.difficulty;
+      var howManyAsteroidsAtStart;
+
+      if (!_this.state.difficulty) {
+        howManyAsteroidsAtStart = 5;
+      } else {
+        howManyAsteroidsAtStart = 30;
+      }
+
       var bullets = [];
       var bullet;
       var ship;
@@ -61196,11 +61206,6 @@ function (_super) {
             var i = _c[_b];
             shoot(true);
           }
-        } //growth more asteroids
-
-
-        if (clock % 10 === 0) {
-          makeAsteroids(1 + curRound);
         }
 
         if (s.keyIsDown(70) && rapidFireAmount > 0) {
@@ -61208,24 +61213,35 @@ function (_super) {
           shoot(false, "depth");
           shoot(false, "depth");
           shoot(false, "depth");
-        }
+        } //growth more asteroids
 
-        if (clock % 40 === 0) {
-          makeAsteroids(2 + curRound, true);
-        }
 
-        if (clock % 150 === 0) {
-          makeAsteroids(3 + curRound, true);
-        }
+        if (!_this.state.difficulty) {
+          if (clock % 15 === 0) {
+            makeAsteroids(1 + curRound);
+          }
+        } else if (_this.state.difficulty) {
+          if (clock % 10 === 0) {
+            makeAsteroids(1 + curRound);
+          }
 
-        if (clock % 300 === 0) {
-          makeAsteroids(10 + curRound, true);
-        }
+          if (clock % 40 === 0) {
+            makeAsteroids(2 + curRound, true);
+          }
 
-        if (clock % 1000 === 0) {
-          console.log("round");
-          curRound++;
-          makeAsteroids(22 + curRound * 2);
+          if (clock % 150 === 0) {
+            makeAsteroids(3 + curRound, true);
+          }
+
+          if (clock % 300 === 0) {
+            makeAsteroids(10 + curRound, true);
+          }
+
+          if (clock % 1000 === 0) {
+            console.log("round");
+            curRound++;
+            makeAsteroids(22 + curRound * 2);
+          }
         } //die broke
 
 
@@ -61330,7 +61346,8 @@ function (_super) {
       health: 4,
       playing: true,
       showControls: false,
-      death: ""
+      death: "",
+      difficulty: gloablDifficulty
     };
     return _this;
   }
@@ -61346,6 +61363,7 @@ function (_super) {
   App.prototype.render = function () {
     var _this = this;
 
+    var difficulty = this.state.difficulty;
     return React.createElement("div", {
       onKeyPress: function onKeyPress(e) {
         console.log("e", e.key);
@@ -61372,7 +61390,16 @@ function (_super) {
       style: {
         backgroundColor: "lightblue"
       }
-    }, "controls"), this.state.death ? React.createElement("h3", {
+    }, "controls"), React.createElement("button", {
+      onClick: function onClick() {
+        _this.setState({
+          difficulty: !difficulty
+        });
+
+        gloablDifficulty = !gloablDifficulty;
+        console.log("dfclty", gloablDifficulty);
+      }
+    }, "difficulty : ", difficulty ? "crazy" : "normal"), this.state.death ? React.createElement("h3", {
       style: {
         marginLeft: "3px",
         color: "red"
@@ -61572,7 +61599,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60835" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55067" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
