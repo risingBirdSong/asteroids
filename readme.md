@@ -5,3 +5,6 @@ I have parcel globally installed, if you do as well, then simply run npm install
 ## project
 
 a purplish space survival game with p5 and react.
+
+## deployed
+https://asteroids-smoky.vercel.app/
