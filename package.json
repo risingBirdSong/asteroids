@@ -13,9 +13,15 @@
   "dependencies": {
     "@types/react": "^16.9.43",
     "@types/react-dom": "^16.9.8",
+    "howler": "^2.2.0",
     "p5": "^1.0.0",
+    "parcel-bundler": "^1.12.4",
+    "pixi-sound": "^3.0.5",
+    "pizzicato": "^0.6.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-howler": "^3.7.4",
+    "supercolliderjs": "^1.0.1",
     "typescript": "^3.9.7"
   }
 }

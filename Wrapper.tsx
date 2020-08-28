@@ -3,21 +3,7 @@ import App from "./App";
 
 const Wrapper = () => {
   const [playing, setPlaying] = React.useState<boolean>(true);
-  return (
-    <div>
-      {playing ? <App /> : "resetting"}
-      {/* <button
-        onClick={() => {
-          setPlaying(false);
-          setTimeout(() => {
-            setPlaying(true);
-          }, 100);
-        }}
-      >
-        reset{" "}
-      </button> */}
-    </div>
-  );
+  return <div>{playing ? <App /> : "resetting"}</div>;
 };
 
 export default Wrapper;

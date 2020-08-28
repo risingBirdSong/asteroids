@@ -1,5 +1,9 @@
 import * as React from "react";
 import p5 from "p5";
+import { Howl, Howler } from "howler";
+import Pizzicato from "pizzicato";
+import ReactHowler from "react-howler";
+
 // import Game from "./game";
 
 interface shipI {
@@ -63,6 +67,7 @@ interface GameStateI {
 }
 
 let gloablDifficulty: boolean = false;
+
 class App extends React.Component<any, GameStateI> {
   public myRef: React.RefObject<HTMLCanvasElement>;
   public myP5: p5;
@@ -99,6 +104,8 @@ class App extends React.Component<any, GameStateI> {
     let ship: shipI;
     let deathHits: p5.Element;
     let deathMap: p5.Element;
+    let laser1 = document.getElementById("laser1") as HTMLAudioElement;
+
     s.setup = () => {
       s.createCanvas(700, 700);
       s.background(100);
@@ -155,16 +162,13 @@ class App extends React.Component<any, GameStateI> {
         }
         let rnd = s.random(0, 100);
         if (rnd <= 50) {
-          // (asteroid.x = s.random(0, s.width)),
           asteroid.x = getRndBias(-200, s.width, 0, 0.9);
           asteroid.y = s.random(-100, -300);
         } else if (rnd > 50) {
           asteroid.x = s.random(-100, -300);
           asteroid.y = getRndBias(-200, s.height, 0, 0.9);
         }
-        // x: s.random(0, s.width),
-        // y: s.random(-100, -300),
-        //cuz why not concat sometimes?
+
         asteroids = asteroids.concat(asteroid);
       }
     };
@@ -175,9 +179,7 @@ class App extends React.Component<any, GameStateI> {
         s.translate(ship.x, ship.y);
         s.rotate(s.radians(ship.angle));
         s.stroke(50);
-        // s.rect(0, 0, 100, 30);
-        // s.fill(200);
-        // s.rect(0, 0, 10, 30);
+
         s.strokeWeight(10);
         s.strokeCap("round");
         s.line(0, 0, 40, 0);
@@ -192,10 +194,7 @@ class App extends React.Component<any, GameStateI> {
         showOnce = false;
         console.clear();
         let radians = (Math.PI * ship.angle) / 180;
-        // console.log("ship angle", ship.angle);
-        // console.log("up radians", radians);
-        // console.log("cos rads", Math.cos(radians) * 10);
-        // console.log("sin rads", Math.sin(radians) * 10);
+
         setTimeout(() => {
           showOnce = true;
         }, 1000);
@@ -317,7 +316,6 @@ class App extends React.Component<any, GameStateI> {
     const handleAsteroid = () => {
       if (singleAsteroid) {
         singleAsteroid.angle += singleAsteroid.angleChange;
-        // console.log("ast x", singleAsteroid.x, "ast y", singleAsteroid.y);
         s.push();
         s.translate(singleAsteroid.x, singleAsteroid.y);
         let rdnsSpin = s.radians(singleAsteroid.angle);
@@ -342,7 +340,6 @@ class App extends React.Component<any, GameStateI> {
         if (astrd.x > s.width * 1.3 || astrd.y > s.height * 1.3) {
           asteroids.splice(idx, 1);
         }
-        // console.log("ast x", astrd.x, "ast y", astrd.y);
         s.push();
         s.translate(astrd.x, astrd.y);
         let rdnsSpin = s.radians(astrd.angle);
@@ -360,10 +357,8 @@ class App extends React.Component<any, GameStateI> {
         s.strokeWeight(2);
         s.fill(1, 200, 50);
         s.pop();
-        // s.translate(astrd.x, astrd.y);
       }
     };
-    //todo, log radians and understand whats going on
 
     const specialAttack = () => {
       if (s.keyIsDown(67) && specialAttackAmount > 0) {
@@ -421,16 +416,10 @@ class App extends React.Component<any, GameStateI> {
       rapidFireAmount += 6 + curRound * 2;
     }, 1100);
 
-    // setInterval(() => {
-    //   console.clear();
-    // }, 1000);
     s.draw = () => {
       resetGame();
-      // console.log(asteroids[0].x, asteroids[0].y);
 
       clock++;
-      // logger();
-      // setTimeout(() => {}, 200);
       if (ship) {
         handleThrust();
         handleDirections();
@@ -441,7 +430,6 @@ class App extends React.Component<any, GameStateI> {
         specialAttack();
       }
       s.background(100);
-      //fire rate
 
       if (clock % 2 === 0) {
         shoot();
@@ -582,17 +570,12 @@ class App extends React.Component<any, GameStateI> {
           }
         }
       }
-      // handleAsteroid();
       shipLogic();
     };
   };
 
   componentDidMount() {
     this.myP5 = new p5(this.Sketch, this.myRef.current);
-  }
-
-  componentWillMount() {
-    this.myP5 = null;
   }
 
   keyBoardRestart = (e) => {};
@@ -610,7 +593,7 @@ class App extends React.Component<any, GameStateI> {
       >
         <div className="info">
           <p>
-            asteroids destroyed :{" "}
+            purple boxes destroyed :{" "}
             <span style={{ color: "purple" }}>
               {" "}
               {this.state.asteroidsDestroyed}
@@ -634,7 +617,7 @@ class App extends React.Component<any, GameStateI> {
               console.log("dfclty", gloablDifficulty);
             }}
           >
-            difficulty : {difficulty ? "crazy" : "normal"}
+            difficulty : {difficulty ? "hard" : "normal"}
           </button>
           {this.state.death ? (
             <h3 style={{ marginLeft: "3px", color: "red" }}>
@@ -646,11 +629,6 @@ class App extends React.Component<any, GameStateI> {
           {this.state.showControls ? (
             <div className="controlpanel">
               <div>
-                {/* <p>
-                  {" "}
-                  <span className="button">button</span>{" "}
-                  <span className="description"> description</span>{" "}
-                </p> */}
                 <div className="spacer">
                   <p>
                     {" "}
@@ -704,9 +682,6 @@ class App extends React.Component<any, GameStateI> {
                   <span className="description"> steer</span>{" "}
                 </p>
                 <br />
-                {/* <div className="note">
-                  note, both special attacks recharge overtime
-                </div> */}
                 <div className="note">
                   <React.Fragment>note, both special attacks</React.Fragment>
                   <br />
