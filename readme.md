@@ -7,3 +7,7 @@ npm start
 ## project
 
 a purplish space survival game with p5 and react and typescript.
+
+## deployed
+
+https://asteroids-smoky.vercel.app/
